@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="goldGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F9D976" />
+      <stop offset="50%" stop-color="#E5C07B" />
+      <stop offset="100%" stop-color="#B8860B" />
+    </linearGradient>
+    <linearGradient id="cyanGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#56B6C2" />
+      <stop offset="100%" stop-color="#226B80" />
+    </linearGradient>
+    <radialGradient id="bgDark1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#161B22" />
+      <stop offset="100%" stop-color="#090D12" />
+    </radialGradient>
+    <filter id="glow1" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background Circle -->
+  <circle cx="250" cy="250" r="230" fill="url(#bgDark1)" stroke="url(#goldGrad1)" stroke-width="4" />
+  <circle cx="250" cy="250" r="218" fill="none" stroke="#30363D" stroke-width="1.5" stroke-dasharray="4 6" />
+
+  <!-- Outer Text Arc Path -->
+  <path id="textArcTop1" d="M 80,250 A 170,170 0 0,1 420,250" fill="none" />
+  <path id="textArcBottom1" d="M 420,250 A 170,170 0 0,1 80,250" fill="none" />
+
+  <text font-family="'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="700" letter-spacing="4" fill="url(#goldGrad1)">
+    <textPath href="#textArcTop1" startOffset="50%" text-anchor="middle">AKERGATE SECURITY GATEWAY</textPath>
+  </text>
+  <text font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="600" letter-spacing="3" fill="#8B949E">
+    <textPath href="#textArcBottom1" startOffset="50%" text-anchor="middle">UNIFIED LINUX PAM DEFENSE</textPath>
+  </text>
+
+  <!-- Central Akhet Horizon Mountains -->
+  <path d="M 170,300 L 210,240 L 250,270 L 290,240 L 330,300 Z" fill="#21262D" stroke="url(#goldGrad1)" stroke-width="3" />
+
+  <!-- Rising Solar Disc / Keyhole Core -->
+  <circle cx="250" cy="225" r="28" fill="url(#goldGrad1)" filter="url(#glow1)" />
+  <circle cx="250" cy="225" r="20" fill="#090D12" />
+  <circle cx="250" cy="220" r="8" fill="url(#cyanGrad1)" />
+  <path d="M 246,224 L 254,224 L 256,238 L 244,238 Z" fill="url(#cyanGrad1)" />
+
+  <!-- Left Lion of Aker (Yesterday - Looking West) -->
+  <g transform="translate(0, 0)">
+    <!-- Body & Haunches -->
+    <path d="M 175,300 C 145,295 125,275 110,245 C 98,220 102,190 120,175 C 130,166 142,165 150,172 C 148,155 158,140 175,135 C 190,131 200,138 205,148 C 210,135 225,128 238,136 C 242,139 244,145 244,152 C 235,165 220,185 222,210 C 223,222 216,238 205,250 C 195,262 185,280 175,300 Z"
+          fill="none" stroke="url(#goldGrad1)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+    <!-- Lion Eye (Egyptian Eye of Wadjet stylized) -->
+    <circle cx="155" cy="188" r="4.5" fill="url(#cyanGrad1)" />
+    <!-- Mane details -->
+    <path d="M 130,200 C 145,210 160,205 175,220" fill="none" stroke="url(#goldGrad1)" stroke-width="2" />
+    <path d="M 140,225 C 152,235 165,230 180,245" fill="none" stroke="url(#goldGrad1)" stroke-width="2" />
+    <path d="M 125,245 C 140,255 155,252 170,270" fill="none" stroke="url(#goldGrad1)" stroke-width="1.8" />
+  </g>
+
+  <!-- Right Lion of Aker (Tomorrow - Looking East) -->
+  <g transform="translate(500, 0) scale(-1, 1)">
+    <!-- Mirrored Body & Haunches -->
+    <path d="M 175,300 C 145,295 125,275 110,245 C 98,220 102,190 120,175 C 130,166 142,165 150,172 C 148,155 158,140 175,135 C 190,131 200,138 205,148 C 210,135 225,128 238,136 C 242,139 244,145 244,152 C 235,165 220,185 222,210 C 223,222 216,238 205,250 C 195,262 185,280 175,300 Z"
+          fill="none" stroke="url(#goldGrad1)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+    <!-- Lion Eye -->
+    <circle cx="155" cy="188" r="4.5" fill="url(#cyanGrad1)" />
+    <!-- Mane details -->
+    <path d="M 130,200 C 145,210 160,205 175,220" fill="none" stroke="url(#goldGrad1)" stroke-width="2" />
+    <path d="M 140,225 C 152,235 165,230 180,245" fill="none" stroke="url(#goldGrad1)" stroke-width="2" />
+    <path d="M 125,245 C 140,255 155,252 170,270" fill="none" stroke="url(#goldGrad1)" stroke-width="1.8" />
+  </g>
+
+  <!-- Base Pedestal / Earth Glyph (Hieroglyphic Strip) -->
+  <rect x="130" y="305" width="240" height="12" rx="3" fill="url(#goldGrad1)" />
+  <path d="M 145,325 L 355,325" stroke="#30363D" stroke-width="2" stroke-dasharray="8 6" />
+
+  <!-- Cryptographic Gate Key Icon at bottom -->
+  <circle cx="250" cy="355" r="14" fill="none" stroke="url(#cyanGrad1)" stroke-width="2.5" />
+  <line x1="250" y1="369" x2="250" y2="395" stroke="url(#cyanGrad1)" stroke-width="2.5" />
+  <line x1="250" y1="380" x2="260" y2="380" stroke="url(#cyanGrad1)" stroke-width="2.5" />
+  <line x1="250" y1="390" x2="257" y2="390" stroke="url(#cyanGrad1)" stroke-width="2.5" />
+</svg>

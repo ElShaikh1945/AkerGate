@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="sealGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFDF85" />
+      <stop offset="100%" stop-color="#C29738" />
+    </linearGradient>
+  </defs>
+
+  <!-- Deep Obsidian Background -->
+  <circle cx="250" cy="250" r="235" fill="#0C1017" />
+
+  <!-- Outer Double Stamp Border -->
+  <circle cx="250" cy="250" r="230" fill="none" stroke="url(#sealGold)" stroke-width="6" />
+  <circle cx="250" cy="250" r="218" fill="none" stroke="url(#sealGold)" stroke-width="2" />
+  <circle cx="250" cy="250" r="162" fill="none" stroke="url(#sealGold)" stroke-width="3" />
+  <circle cx="250" cy="250" r="154" fill="none" stroke="#56B6C2" stroke-width="1.5" stroke-dasharray="3 4" />
+
+  <!-- Star / Solar Notches around the Stamp Ring -->
+  <g fill="url(#sealGold)">
+    <polygon points="250,22 254,32 250,42 246,32" />
+    <polygon points="250,458 254,468 250,478 246,468" />
+    <polygon points="22,250 32,254 42,250 32,246" />
+    <polygon points="458,250 468,254 478,250 468,246" />
+  </g>
+
+  <!-- Circular Stamp Text -->
+  <path id="sealTextTop" d="M 60,250 A 190,190 0 0,1 440,250" fill="none" />
+  <path id="sealTextBottom" d="M 440,250 A 190,190 0 0,1 60,250" fill="none" />
+
+  <text font-family="'Segoe UI', Arial, sans-serif" font-size="19" font-weight="900" letter-spacing="5" fill="url(#sealGold)">
+    <textPath href="#sealTextTop" startOffset="50%" text-anchor="middle">★ AKERGATE PROTOCOL ★</textPath>
+  </text>
+  <text font-family="'Segoe UI', Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="4" fill="#56B6C2">
+    <textPath href="#sealTextBottom" startOffset="50%" text-anchor="middle">• ZERO-TRUST PAM SENTINEL •</textPath>
+  </text>
+
+  <!-- Central Aker Twin Lion Silhouette (Solid Stampable Silhouette) -->
+  <!-- Left Lion -->
+  <path d="M 245,200 C 235,170 215,155 190,155 C 165,155 145,175 145,200 C 145,215 155,225 160,235 C 145,235 130,245 130,265 C 130,290 160,305 200,305 L 245,305 Z"
+        fill="url(#sealGold)" />
+  <!-- Left Lion Face Cutout -->
+  <circle cx="170" cy="185" r="4" fill="#0C1017" />
+  <path d="M 155,195 L 140,202 L 155,205 Z" fill="#0C1017" />
+
+  <!-- Right Lion (Mirrored) -->
+  <path d="M 255,200 C 265,170 285,155 310,155 C 335,155 355,175 355,200 C 355,215 345,225 340,235 C 355,235 370,245 370,265 C 370,290 340,305 300,305 L 255,305 Z"
+        fill="url(#sealGold)" />
+  <!-- Right Lion Face Cutout -->
+  <circle cx="330" cy="185" r="4" fill="#0C1017" />
+  <path d="M 345,195 L 360,202 L 345,205 Z" fill="#0C1017" />
+
+  <!-- The Horizon Sun Disc (Akhet) between lions -->
+  <circle cx="250" cy="155" r="26" fill="#0C1017" stroke="url(#sealGold)" stroke-width="4" />
+  <circle cx="250" cy="155" r="16" fill="url(#sealGold)" />
+  <!-- Central Hieroglyphic Gate Keyhole -->
+  <rect x="248" y="145" width="4" height="20" fill="#0C1017" />
+  <circle cx="250" cy="150" r="5" fill="#0C1017" />
+
+  <!-- Base Hieroglyphic Earth/Horizon Sign (𓇾) -->
+  <path d="M 160,315 L 340,315 L 325,335 L 175,335 Z" fill="none" stroke="url(#sealGold)" stroke-width="3" />
+  <line x1="190" y1="325" x2="310" y2="325" stroke="#56B6C2" stroke-width="2" />
+</svg>

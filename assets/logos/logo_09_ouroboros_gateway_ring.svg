@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="ringGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F6D365" />
+      <stop offset="100%" stop-color="#FDA085" />
+    </linearGradient>
+    <linearGradient id="ringCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#56B6C2" />
+      <stop offset="100%" stop-color="#61AFEF" />
+    </linearGradient>
+  </defs>
+
+  <rect width="500" height="500" fill="#0E121A" />
+
+  <!-- The Ouroboros / Infinite Gateway Ring -->
+  <circle cx="250" cy="250" r="180" fill="none" stroke="url(#ringGold)" stroke-width="14" stroke-linecap="round" />
+  <circle cx="250" cy="250" r="160" fill="none" stroke="#21262D" stroke-width="2" stroke-dasharray="6 6" />
+  <circle cx="250" cy="250" r="200" fill="none" stroke="#21262D" stroke-width="2" stroke-dasharray="10 8" />
+
+  <!-- Left Lion Emerging from Ring (West/Yesterday) -->
+  <g transform="translate(110, 210)">
+    <path d="M 50,40 C 30,30 10,25 -20,20 C -15,5 -5,-15 15,-20 C 35,-25 60,-15 70,0 C 80,15 75,35 50,40 Z" 
+          fill="#E5C07B" stroke="#0E121A" stroke-width="3" />
+    <path d="M -20,20 L -35,30 L -25,10 Z" fill="#E5C07B" />
+    <circle cx="10" cy="-5" r="5" fill="#56B6C2" />
+  </g>
+
+  <!-- Right Lion Emerging from Ring (East/Tomorrow) -->
+  <g transform="translate(390, 210) scale(-1, 1)">
+    <path d="M 50,40 C 30,30 10,25 -20,20 C -15,5 -5,-15 15,-20 C 35,-25 60,-15 70,0 C 80,15 75,35 50,40 Z" 
+          fill="#E5C07B" stroke="#0E121A" stroke-width="3" />
+    <path d="M -20,20 L -35,30 L -25,10 Z" fill="#E5C07B" />
+    <circle cx="10" cy="-5" r="5" fill="#56B6C2" />
+  </g>
+
+  <!-- Central Real-Time Clock / Cryptographic Core -->
+  <circle cx="250" cy="250" r="70" fill="#161B22" stroke="url(#ringCyan)" stroke-width="4" />
+  <!-- Clock ticks / 12 Hours -->
+  <g stroke="#56B6C2" stroke-width="2">
+    <line x1="250" y1="190" x2="250" y2="198" />
+    <line x1="250" y1="302" x2="250" y2="310" />
+    <line x1="190" y1="250" x2="198" y2="250" />
+    <line x1="302" y1="250" x2="310" y2="250" />
+  </g>
+  <!-- Clock Hands pointing to 10:10 (balanced victory) -->
+  <line x1="250" y1="250" x2="225" y2="220" stroke="url(#ringGold)" stroke-width="4" stroke-linecap="round" />
+  <line x1="250" y1="250" x2="280" y2="225" stroke="url(#ringGold)" stroke-width="3" stroke-linecap="round" />
+  <circle cx="250" cy="250" r="7" fill="url(#ringGold)" />
+
+  <!-- Gateway Keyhole Silhouette at Bottom of Center -->
+  <path d="M 245,270 L 255,270 L 257,285 L 243,285 Z" fill="#56B6C2" />
+
+  <!-- Bottom Arch Label -->
+  <text x="250" y="440" font-family="'Segoe UI', Roboto, sans-serif" font-size="20" font-weight="900" letter-spacing="6" fill="url(#ringGold)" text-anchor="middle">AKERGATE</text>
+  <text x="250" y="465" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="600" letter-spacing="4" fill="#8B949E" text-anchor="middle">TEMPORAL AUTHENTICATION</text>
+</svg>

@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="padlockGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFEAA7" />
+      <stop offset="50%" stop-color="#E5C07B" />
+      <stop offset="100%" stop-color="#D4AF37" />
+    </linearGradient>
+    <linearGradient id="padlockCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#56B6C2" />
+      <stop offset="100%" stop-color="#1E3799" />
+    </linearGradient>
+  </defs>
+
+  <!-- Dark Background -->
+  <rect width="500" height="500" rx="30" fill="#0A0E14" />
+
+  <!-- The Padlock Shackle / Solar Arc -->
+  <path d="M 180,210 L 180,140 C 180,95 210,65 250,65 C 290,65 320,95 320,140 L 320,210" 
+        fill="none" stroke="url(#padlockGold)" stroke-width="22" stroke-linecap="round" />
+
+  <!-- Shackle Inner Glow / Accent -->
+  <path d="M 200,200 L 200,145 C 200,115 220,90 250,90 C 280,90 300,115 300,145 L 300,200" 
+        fill="none" stroke="#56B6C2" stroke-width="4" stroke-linecap="round" stroke-dasharray="8 6" />
+
+  <!-- Akhet Mountain Valley Body (The Lock Body styled as the Two Peaks of Aker) -->
+  <path d="M 70,390 L 130,220 C 145,180 185,180 200,220 L 250,300 L 300,220 C 315,180 355,180 370,220 L 430,390 C 440,420 415,440 380,440 L 120,440 C 85,440 60,420 70,390 Z"
+        fill="#161B22" stroke="url(#padlockGold)" stroke-width="6" stroke-linejoin="round" />
+
+  <!-- Left Lion Face Profile in Mountain Crest -->
+  <path d="M 140,240 C 120,250 110,270 115,290 C 120,310 135,325 155,330 L 210,330" fill="none" stroke="url(#padlockGold)" stroke-width="3" />
+  <circle cx="140" cy="275" r="5" fill="#56B6C2" />
+
+  <!-- Right Lion Face Profile in Mountain Crest -->
+  <path d="M 360,240 C 380,250 390,270 385,290 C 380,310 365,325 345,330 L 290,330" fill="none" stroke="url(#padlockGold)" stroke-width="3" />
+  <circle cx="360" cy="275" r="5" fill="#56B6C2" />
+
+  <!-- Central Glowing Sun Disc (The Keyhole Core) -->
+  <circle cx="250" cy="235" r="42" fill="#0A0E14" stroke="url(#padlockGold)" stroke-width="5" />
+  <circle cx="250" cy="235" r="32" fill="url(#padlockGold)" />
+  <circle cx="250" cy="235" r="18" fill="#0A0E14" />
+
+  <!-- Modern Keyhole Cutout -->
+  <circle cx="250" cy="230" r="6" fill="#56B6C2" />
+  <polygon points="247,233 253,233 255,245 245,245" fill="#56B6C2" />
+
+  <!-- Horizon Base Inscription -->
+  <line x1="120" y1="410" x2="380" y2="410" stroke="url(#padlockGold)" stroke-width="3" />
+  <text x="250" y="432" font-family="'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="900" letter-spacing="8" fill="#56B6C2" text-anchor="middle">AKERGATE</text>
+</svg>

@@ -28,7 +28,8 @@ from akergate.core.lockdown import (
     trigger_lockdown,
     disarm_lockdown,
     is_lockdown_active,
-    verify_consecutive_totp
+    parse_custom_policy,
+    evaluate_custom_disarm
 )
 
 class TestAkerGateCore(unittest.TestCase):
@@ -122,27 +123,39 @@ class TestAkerGateCore(unittest.TestCase):
         self.assertIn("AkerGate Incident & Forensic Snapshot Report", content)
         self.assertIn("Metadata", content)
         
-        # 2. Test lockdown trigger
-        ok, r_path = trigger_lockdown(policy="dual_totp", trigger_source="test_panic")
-        self.assertTrue(ok)
-        self.assertTrue(is_lockdown_active())
+        # 2. Test policy parser
+        custom_p = parse_custom_policy("totp=3,pin=1234,tg")
+        self.assertEqual(custom_p["totp_count"], 3)
+        self.assertTrue(custom_p["require_emergency_pin"])
+        self.assertTrue(custom_p["require_telegram_otp"])
+        self.assertTrue(bool(custom_p["emergency_pin_hash"]))
         
-        # 3. Test consecutive TOTP verification
+        # 3. Test triggering lockdown with custom PIN + TOTP
         secret = generate_totp_secret()
         now = time.time()
         c1 = compute_totp(secret, timestamp=now)
-        c2 = compute_totp(secret, timestamp=now + 30) # Next 30s step
         
-        # Combined 12 digits
-        combined = f"{c1}{c2}"
-        self.assertTrue(verify_consecutive_totp(secret, combined))
+        ok, r_path = trigger_lockdown(policy_input="totp=1,pin=7788", trigger_source="test_panic")
+        self.assertTrue(ok)
+        self.assertTrue(is_lockdown_active())
         
-        # Invalid combined
-        self.assertFalse(verify_consecutive_totp(secret, "000000111111"))
+        # Test wrong token fails
+        sat_bad, _ = evaluate_custom_disarm("wrong_token", secret, "")
+        self.assertFalse(sat_bad)
+        self.assertTrue(is_lockdown_active())
         
-        # 4. Test disarming
-        disarmed = disarm_lockdown()
-        self.assertTrue(disarmed)
+        # Test combined PIN + TOTP disarms successfully
+        sat_good, msg = evaluate_custom_disarm(f"7788+{c1}", secret, "")
+        self.assertTrue(sat_good, msg)
+        self.assertFalse(is_lockdown_active())
+        
+        # 4. Test 2-Consecutive TOTP disarm
+        c2 = compute_totp(secret, timestamp=now + 30)
+        ok2, _ = trigger_lockdown(policy_input="totp=2", trigger_source="test_panic_2")
+        self.assertTrue(ok2)
+        
+        sat_consec, msg2 = evaluate_custom_disarm(f"{c1}{c2}", secret, "")
+        self.assertTrue(sat_consec, msg2)
         self.assertFalse(is_lockdown_active())
 
 if __name__ == "__main__":

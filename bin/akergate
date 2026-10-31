@@ -76,7 +76,7 @@ def main():
     elif cmd == "lockdown":
         from akergate.core.lockdown import trigger_lockdown
         policy = sys.argv[2] if len(sys.argv) > 2 else "dual_totp"
-        ok, report = trigger_lockdown(policy=policy, trigger_source="cli_command")
+        ok, report = trigger_lockdown(policy_input=policy, trigger_source="cli_command")
         if ok:
             print(f"[+] Emergency lockdown activated with policy '{policy}'.")
             print(f"[+] Forensic snapshot created at: {report}")

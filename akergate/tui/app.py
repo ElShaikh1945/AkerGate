@@ -37,7 +37,8 @@ from akergate.core.lockdown import (
     get_lockdown_state,
     trigger_lockdown,
     disarm_lockdown,
-    POLICIES
+    parse_custom_policy,
+    DEFAULT_POLICY
 )
 from akergate.pam.patcher import is_pam_patched, patch_pam, unpatch_pam
 from akergate.pam.rollback import run_failsafe_test
@@ -461,49 +462,107 @@ def render_audit_logs():
 def render_lockdown():
     active = is_lockdown_active()
     state = get_lockdown_state()
+    policy = state.get("policy", DEFAULT_POLICY)
     
     if active:
         status_banner = "[bold white on red] EMERGENCY LOCKDOWN ACTIVE [/bold white on red]"
-        policy_name = POLICIES.get(state.get("policy", ""), state.get("policy", ""))
+        
+        req_list = []
+        if policy.get("totp_count", 0) > 0:
+            req_list.append(f"{policy['totp_count']} Consecutive TOTP code(s)")
+        if policy.get("require_emergency_pin"):
+            req_list.append("Emergency Recovery PIN")
+        if policy.get("require_telegram_otp"):
+            req_list.append("Telegram Windowed OTP")
+        req_str = ", ".join(req_list) if req_list else "None (Manual Disarm Only)"
+        
         details = (
             f"• Status: {status_banner}\n"
-            f"• Enforced Policy: [bold cyan]{policy_name}[/bold cyan]\n"
+            f"• Policy Name: [bold cyan]{policy.get('name', 'custom').upper()}[/bold cyan]\n"
+            f"• Required for Disarm: [bold yellow]{req_str}[/bold yellow]\n"
             f"• Trigger Source: `{state.get('trigger_source', 'unknown')}`\n"
             f"• Incident Time: `{state.get('iso_time', 'unknown')}`\n"
             f"• Forensic Report: `{state.get('report_path', 'None')}`\n\n"
             "[bold yellow]Standard 1-token authentication is suspended.[/bold yellow]\n"
-            "Offline Recovery requires entering two consecutive 6-digit TOTP codes."
+            "Disarm on host by entering the required credentials (e.g. `PIN+TOTP1+TOTP2`)."
         )
     else:
         status_banner = "[bold green]NORMAL - SYSTEM SECURE[/bold green]"
         details = (
             f"• Status: {status_banner}\n"
             "• Mode: Flexible Multi-Auth (Password / TOTP / Telegram OTP)\n"
-            "• Automatic Brute-Force Trigger: Enabled (Breach at 5 consecutive failures)"
+            "• Automatic Brute-Force Trigger: Enabled (Breach at 5 consecutive failures)\n"
+            "• Disarm Policy: Fully Customizable on demand"
         )
         
-    console.print(Panel(details, title="[bold]Host Quarantine & Defense Console[/bold]", border_style="red" if active else "green"))
+    console.print(Panel(details, title="[bold]Host Quarantine & Custom Defense Console[/bold]", border_style="red" if active else "green"))
     
     console.print("\n[bold]Actions:[/bold]")
     if active:
         console.print("  [D] Disarm Lockdown (Return to Normal)")
     else:
-        console.print("  [1] Trigger Dual-TOTP Lockdown (Recommended Offline Recovery)")
-        console.print("  [2] Trigger Strict 3FA Lockdown (Password + TOTP + Telegram OTP)")
-        console.print("  [3] Trigger TOTP Only Lockdown")
+        console.print("  [1] Trigger Lockdown: Dual Consecutive TOTP (Offline Safe)")
+        console.print("  [2] Trigger Lockdown: Custom Rule Builder (Customize factors freely)")
+        console.print("  [3] Trigger Lockdown: Emergency PIN Only")
     console.print("  [V] View Latest Forensic Incident Report")
     console.print("  [B] Back to Dashboard")
     
     allowed = ["d", "D", "v", "V", "b", "B"] if active else ["1", "2", "3", "v", "V", "b", "B"]
     choice = Prompt.ask("\nSelect action", choices=allowed, default="b")
     
-    if choice in ("1", "2", "3"):
-        policy_map = {"1": "dual_totp", "2": "strict_3fa", "3": "totp_only"}
-        pol = policy_map[choice]
-        if Confirm.ask(f"Confirm emergency quarantine with policy '{pol}'?"):
-            ok, report = trigger_lockdown(policy=pol, trigger_source="tui_manual")
+    if choice == "1":
+        if Confirm.ask("Confirm emergency quarantine with policy 'dual_totp'?"):
+            ok, report = trigger_lockdown(policy_input="dual_totp", trigger_source="tui_manual")
             if ok:
                 console.print(f"[+] Emergency lockdown activated. Forensic report: {report}", style="bold red")
+            time.sleep(2)
+            
+    elif choice == "2":
+        console.print("\n[bold cyan]--- Custom Disarm Policy Builder ---[/bold cyan]")
+        totp_count_str = Prompt.ask("Number of Consecutive TOTP codes required (0 for none)", default="2")
+        try:
+            totp_cnt = int(totp_count_str)
+        except ValueError:
+            totp_cnt = 2
+            
+        req_pin = Confirm.ask("Require custom Emergency Recovery PIN?", default=False)
+        pin_val = ""
+        if req_pin:
+            pin_val = Prompt.ask("Enter emergency PIN/Passphrase", password=True)
+            
+        req_tg = Confirm.ask("Require active Telegram OTP?", default=False)
+        expire_str = Prompt.ask("Auto-expire and unlock after X minutes (0 for never)", default="0")
+        try:
+            expire_mins = int(expire_str)
+        except ValueError:
+            expire_mins = 0
+            
+        custom_rule = {
+            "name": "custom_builder",
+            "totp_count": totp_cnt,
+            "require_emergency_pin": req_pin,
+            "emergency_pin_hash": "",
+            "require_telegram_otp": req_tg,
+            "allow_remote_disarm": True,
+            "auto_expire_minutes": expire_mins
+        }
+        
+        from akergate.core.lockdown import hash_pin
+        if req_pin and pin_val:
+            custom_rule["emergency_pin_hash"] = hash_pin(pin_val)
+            
+        if Confirm.ask("Activate lockdown now with these custom rules?"):
+            ok, report = trigger_lockdown(policy_input=custom_rule, trigger_source="tui_custom_builder")
+            if ok:
+                console.print(f"[+] Custom lockdown activated! Report: {report}", style="bold red")
+            time.sleep(2)
+            
+    elif choice == "3":
+        pin_input = Prompt.ask("Enter Emergency Recovery PIN to lock with", password=True)
+        if pin_input:
+            ok, report = trigger_lockdown(policy_input="pin_only", trigger_source="tui_pin_only", emergency_pin=pin_input)
+            if ok:
+                console.print(f"[+] PIN-only lockdown activated! Report: {report}", style="bold red")
             time.sleep(2)
             
     elif choice in ("d", "D"):

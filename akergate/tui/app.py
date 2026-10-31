@@ -446,7 +446,8 @@ def render_serverless_wizard():
             console.print("\n[*] Pushing to Telegram Serverless (npx @tgcloud/cli push)...", style="cyan")
             run_deploy = Confirm.ask("Execute automated deployment now?")
             if run_deploy:
-                success, output = run_tgcloud_push(cli_token=current_cli_tok)
+                with console.status("[bold cyan]Uploading handlers to Telegram V8 cloud isolates...[/bold cyan]", spinner="dots"):
+                    success, output = run_tgcloud_push(cli_token=current_cli_tok)
                 if success:
                     tg_cfg["backend"] = "telegram_serverless"
                     config["telegram"] = tg_cfg

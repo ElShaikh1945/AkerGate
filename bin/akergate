@@ -1,0 +1,82 @@
+#!/usr/bin/env python3
+"""
+AkerGate - Command Line & TUI Interface Entrypoint
+"""
+
+import sys
+import os
+from pathlib import Path
+
+# Add project root to python path
+project_root = Path(__file__).resolve().parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
+from akergate.config import load_config, get_totp_secret_file
+from akergate.core.storage import get_totp_secret, get_telegram_secret
+from akergate.core.totp import compute_totp, build_otpauth_uri
+from akergate.pam.patcher import is_pam_patched, patch_pam, unpatch_pam
+from akergate.tui.qr_render import generate_terminal_qr
+from akergate.tui.app import main_tui
+
+def print_help():
+    print("AkerGate - Multi-Auth Linux PAM Manager")
+    print("Usage: akergate [command]")
+    print("")
+    print("Commands:")
+    print("  (none)      Launch interactive Terminal UI (TUI)")
+    print("  status      Print current PAM and authentication status")
+    print("  qr          Display TOTP QR code in terminal")
+    print("  patch       Enable AkerGate in PAM (/etc/pam.d/common-auth)")
+    print("  unpatch     Disable AkerGate and restore original PAM")
+    print("  sentry      Run background Sentry event monitor daemon")
+    print("  help        Show this help message")
+
+def main():
+    if len(sys.argv) == 1:
+        main_tui()
+        return
+
+    cmd = sys.argv[1].lower()
+
+    if cmd in ("-h", "--help", "help"):
+        print_help()
+    elif cmd == "status":
+        cfg = load_config()
+        patched = is_pam_patched()
+        totp_ok = bool(get_totp_secret())
+        tg_ok = bool(get_telegram_secret())
+        print(f"[i] PAM Hook Status:     {'[ACTIVE]' if patched else '[NOT CONFIGURED]'}")
+        print(f"[i] TOTP Configured:     {'[YES]' if totp_ok else '[NO]'}")
+        print(f"[i] Telegram Configured: {'[YES]' if tg_ok else '[NO]'}")
+    elif cmd == "qr":
+        secret = get_totp_secret()
+        if not secret:
+            print("[!] No TOTP secret key found. Run 'akergate' to generate one.")
+            sys.exit(1)
+        user = os.environ.get("USER", "yuki")
+        uri = build_otpauth_uri(secret, user)
+        print(f"[i] Base32 Secret: {secret}\n")
+        print(generate_terminal_qr(uri))
+    elif cmd == "patch":
+        if os.geteuid() != 0:
+            print("[!] Root privileges required. Run: sudo akergate patch")
+            sys.exit(1)
+        ok, msg = patch_pam()
+        print(f"[{'+' if ok else '!'}] {msg}")
+    elif cmd == "unpatch":
+        if os.geteuid() != 0:
+            print("[!] Root privileges required. Run: sudo akergate unpatch")
+            sys.exit(1)
+        ok, msg = unpatch_pam()
+        print(f"[{'+' if ok else '!'}] {msg}")
+    elif cmd == "sentry":
+        from akergate.sentry.daemon import run_sentry_daemon
+        run_sentry_daemon()
+    else:
+        print(f"[!] Unknown command: {cmd}")
+        print_help()
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()

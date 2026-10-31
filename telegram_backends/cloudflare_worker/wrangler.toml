@@ -1,0 +1,11 @@
+name = "akergate-telegram-bot"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+INTERVAL_SECONDS = "300"
+
+# Note: Add sensitive secrets via:
+# wrangler secret put BOT_TOKEN
+# wrangler secret put ALLOWED_CHAT_ID
+# wrangler secret put SHARED_SECRET

@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "akergate"
+version = "0.1.0"
+description = "Unified Multi-Factor PAM Engine for Linux (Password, TOTP, Offline Telegram OTP)"
+authors = [
+  { name = "Yuki" }
+]
+readme = "README.md"
+license = { text = "PolyForm Noncommercial 1.0.0" }
+requires-python = ">=3.9"
+dependencies = [
+  "rich>=12.0.0",
+  "qrcode>=7.0"
+]
+
+[project.scripts]
+akergate = "akergate.tui.app:main_tui"
+akergate-pam = "akergate.core.pam_hook:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["akergate*"]

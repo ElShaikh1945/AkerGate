@@ -1,0 +1,18 @@
+[Unit]
+Description=AkerGate Sentry - Authentication Event Monitor & Telegram Notifier
+After=network.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/local/bin/akergate sentry
+Restart=always
+RestartSec=10
+
+# Security Sandbox
+ProtectSystem=full
+ProtectHome=read-only
+ReadWritePaths=/var/lib/akergate /var/log/akergate /etc/akergate
+
+[Install]
+WantedBy=multi-user.target

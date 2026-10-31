@@ -102,7 +102,7 @@ export default async function handleMessage(message) {
         ]
       });
       await api.setChatMenuButton({
-        menu_button: { type: "commands" }
+        menu_button: { type: "default" }
       });
     } catch (_) {}
 

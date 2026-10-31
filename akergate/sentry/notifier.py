@@ -160,9 +160,9 @@ def set_telegram_bot_commands(bot_token: str) -> tuple[bool, str]:
             if not res_data.get("ok"):
                 return False, res_data.get("description", "Failed to register commands.")
 
-        # 2. Register Chat Menu Button (persistent '/' button)
+        # 2. Reset Chat Menu Button to default (clean '/' icon only, no 'Menu' text label)
         menu_url = f"https://api.telegram.org/bot{bot_token}/setChatMenuButton"
-        menu_payload = {"menu_button": {"type": "commands"}}
+        menu_payload = {"menu_button": {"type": "default"}}
         menu_data = json.dumps(menu_payload).encode("utf-8")
         menu_req = urllib.request.Request(menu_url, data=menu_data, headers={"Content-Type": "application/json"})
         try:

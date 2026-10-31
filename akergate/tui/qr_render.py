@@ -5,6 +5,9 @@ Zero external heavy dependencies (uses standard python-qrcode or fallback).
 Zero emojis.
 """
 
+import functools
+
+@functools.lru_cache(maxsize=16)
 def generate_terminal_qr(data: str) -> str:
     """
     Renders an ASCII/Unicode QR Code directly for terminal display.

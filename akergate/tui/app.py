@@ -44,15 +44,27 @@ from akergate.core.lockdown import (
 from akergate.pam.patcher import is_pam_patched, patch_pam, unpatch_pam
 from akergate.pam.rollback import run_failsafe_test
 from akergate.tui.qr_render import generate_terminal_qr
-from akergate.tui.keyboard import get_key, select_menu, wait_for_key
+from akergate.tui.keyboard import get_key, select_menu, wait_for_key, console
 from akergate.tui.ascii_banner import get_rich_banner
 from akergate.sentry.notifier import send_telegram_alert, is_network_available
 from akergate.i18n import t, get_current_language, set_language, list_available_languages
 
-console = Console()
+_last_net_check_time = 0.0
+_cached_net_state = False
+
+def get_cached_network_status(ttl: float = 15.0) -> bool:
+    """Return network availability with 15-second TTL cache to eliminate UI render stutter."""
+    global _last_net_check_time, _cached_net_state
+    now = time.time()
+    if now - _last_net_check_time > ttl:
+        _cached_net_state = is_network_available(timeout=1)
+        _last_net_check_time = now
+    return _cached_net_state
 
 def clear_screen():
-    console.clear()
+    """In-place clean reposition (cursor to top-left and clear to bottom) without wiping buffer."""
+    sys.stdout.write("\033[H\033[J")
+    sys.stdout.flush()
 
 def print_header(active_tab: str = "Dashboard", highlighted_tab_idx: Optional[int] = None):
     tabs = [
@@ -124,7 +136,7 @@ def render_dashboard():
     )
     table.add_row(
         t("dashboard.network_link"),
-        f"[green]{t('dashboard.online')}[/green]" if is_network_available() else f"[yellow]{t('dashboard.offline')}[/yellow]",
+        f"[green]{t('dashboard.online')}[/green]" if get_cached_network_status() else f"[yellow]{t('dashboard.offline')}[/yellow]",
         t("dashboard.network_desc")
     )
     
@@ -665,90 +677,98 @@ def main_tui():
     
     current_tab_idx = 0
     
-    while True:
-        clear_screen()
-        active_tab = tab_names[current_tab_idx]
-        
-        if active_tab == "Dashboard":
-            def draw_dash():
-                print_header(active_tab="Dashboard", highlighted_tab_idx=current_tab_idx)
-                render_dashboard()
+    # Enter terminal alternate screen buffer (clean dedicated canvas)
+    sys.stdout.write("\033[?1049h\033[H")
+    sys.stdout.flush()
+    try:
+        while True:
+            clear_screen()
+            active_tab = tab_names[current_tab_idx]
+            
+            if active_tab == "Dashboard":
+                def draw_dash():
+                    print_header(active_tab="Dashboard", highlighted_tab_idx=current_tab_idx)
+                    render_dashboard()
 
-            dash_options = [
-                ("Configure Protected Services", "Manage PAM rules for sudo, login, screensaver, sshd"),
-                ("Manage TOTP & Scan QR Code", "View current credentials or re-scan terminal QR"),
-                ("Telegram Bot Offline Settings", "Manage bot token, chat ID, and 7-digit OTP tests"),
-                ("Sentry Event Monitor", "Configure brute-force lockdown and alert notifications"),
-                ("View Authentication Audit Logs", "Read authentication history and timestamps"),
-                ("Emergency Quarantine & Lockdown", "Trigger or disarm lockdown policies"),
-                ("View AkerGate Logo Banner", "Display official two-tone typography banner"),
-                (f"Switch Language ({'العربية' if get_current_language() == 'en' else 'English'})", "Toggle interface language instantly"),
-                ("Quit AkerGate Console", "Close interactive terminal user interface")
-            ]
+                dash_options = [
+                    ("Configure Protected Services", "Manage PAM rules for sudo, login, screensaver, sshd"),
+                    ("Manage TOTP & Scan QR Code", "View current credentials or re-scan terminal QR"),
+                    ("Telegram Bot Offline Settings", "Manage bot token, chat ID, and 7-digit OTP tests"),
+                    ("Sentry Event Monitor", "Configure brute-force lockdown and alert notifications"),
+                    ("View Authentication Audit Logs", "Read authentication history and timestamps"),
+                    ("Emergency Quarantine & Lockdown", "Trigger or disarm lockdown policies"),
+                    ("View AkerGate Logo Banner", "Display official two-tone typography banner"),
+                    (f"Switch Language ({'العربية' if get_current_language() == 'en' else 'English'})", "Toggle interface language instantly"),
+                    ("Quit AkerGate Console", "Close interactive terminal user interface")
+                ]
 
-            choice_idx = select_menu(
-                dash_options,
-                default_index=0,
-                title="Dashboard Navigation & Actions (Use UP / DOWN Arrows + ENTER)",
-                on_render_header=draw_dash,
-                allow_cancel=False
-            )
+                choice_idx = select_menu(
+                    dash_options,
+                    default_index=0,
+                    title="Dashboard Navigation & Actions (Use UP / DOWN Arrows + ENTER)",
+                    on_render_header=draw_dash,
+                    allow_cancel=False
+                )
 
-            if choice_idx == 0:
-                current_tab_idx = 1
-            elif choice_idx == 1:
-                current_tab_idx = 2
-            elif choice_idx == 2:
-                current_tab_idx = 3
-            elif choice_idx == 3:
-                current_tab_idx = 4
-            elif choice_idx == 4:
-                current_tab_idx = 5
-            elif choice_idx == 5:
-                current_tab_idx = 6
-            elif choice_idx == 6:
-                current_tab_idx = 7
-            elif choice_idx == 7:
+                if choice_idx == 0:
+                    current_tab_idx = 1
+                elif choice_idx == 1:
+                    current_tab_idx = 2
+                elif choice_idx == 2:
+                    current_tab_idx = 3
+                elif choice_idx == 3:
+                    current_tab_idx = 4
+                elif choice_idx == 4:
+                    current_tab_idx = 5
+                elif choice_idx == 5:
+                    current_tab_idx = 6
+                elif choice_idx == 6:
+                    current_tab_idx = 7
+                elif choice_idx == 7:
+                    curr = get_current_language()
+                    set_language("ar" if curr == "en" else "en")
+                elif choice_idx == 8 or choice_idx == len(dash_options) - 1:
+                    break
+                    
+            elif active_tab == "Services":
+                render_services()
+                current_tab_idx = 0
+                
+            elif active_tab == "TOTP / QR":
+                render_totp_setup()
+                current_tab_idx = 0
+                
+            elif active_tab == "Telegram":
+                render_telegram_setup()
+                current_tab_idx = 0
+                
+            elif active_tab == "Sentry":
+                render_sentry_setup()
+                current_tab_idx = 0
+                
+            elif active_tab == "Audit Logs":
+                render_audit_logs()
+                current_tab_idx = 0
+                
+            elif active_tab == "Lockdown":
+                render_lockdown()
+                current_tab_idx = 0
+                
+            elif active_tab == "Banner":
+                render_banner_screen()
+                current_tab_idx = 0
+                
+            elif active_tab == "Lang":
                 curr = get_current_language()
                 set_language("ar" if curr == "en" else "en")
-            elif choice_idx == 8 or choice_idx == len(dash_options) - 1:
-                break
+                current_tab_idx = 0
                 
-        elif active_tab == "Services":
-            render_services()
-            current_tab_idx = 0
-            
-        elif active_tab == "TOTP / QR":
-            render_totp_setup()
-            current_tab_idx = 0
-            
-        elif active_tab == "Telegram":
-            render_telegram_setup()
-            current_tab_idx = 0
-            
-        elif active_tab == "Sentry":
-            render_sentry_setup()
-            current_tab_idx = 0
-            
-        elif active_tab == "Audit Logs":
-            render_audit_logs()
-            current_tab_idx = 0
-            
-        elif active_tab == "Lockdown":
-            render_lockdown()
-            current_tab_idx = 0
-            
-        elif active_tab == "Banner":
-            render_banner_screen()
-            current_tab_idx = 0
-            
-        elif active_tab == "Lang":
-            curr = get_current_language()
-            set_language("ar" if curr == "en" else "en")
-            current_tab_idx = 0
-            
-        elif active_tab == "Quit":
-            break
+            elif active_tab == "Quit":
+                break
+    finally:
+        # Restore normal terminal screen buffer and ensure cursor is visible
+        sys.stdout.write("\033[?1049l\033[?25h")
+        sys.stdout.flush()
 
 if __name__ == "__main__":
     main_tui()

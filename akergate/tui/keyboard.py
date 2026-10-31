@@ -115,6 +115,7 @@ def select_menu(
     Pressing ENTER or SPACE selects the highlighted option.
     Pressing ESC returns the last option (if allow_cancel is True).
     Direct digit keys (1-9) or shortcut letters will also jump/select.
+    100% flicker-free atomic in-place frame rendering (repositions cursor, no blanking).
 
     Each option is a tuple: (Label, Description)
     Returns: Index of the selected option (0 to len(options)-1).
@@ -129,69 +130,90 @@ def select_menu(
     if not os.isatty(fd):
         return current_idx
 
-    while True:
-        console.clear()
-        if on_render_header:
-            on_render_header()
+    first_render = True
+    try:
+        # Hide cursor during menu interaction to eliminate cursor jitter
+        sys.stdout.write("\033[?25l")
+        sys.stdout.flush()
 
-        # Build menu table
-        table = Table(show_header=False, expand=True, box=None, padding=(0, 1))
-        table.add_column("Pointer", width=3, style="bold")
-        table.add_column("Number", width=4, style="dim")
-        table.add_column("Action", style="bold")
-        table.add_column("Details")
+        while True:
+            # Capture entire frame into a single in-memory buffer
+            with console.capture() as capture:
+                if on_render_header:
+                    on_render_header()
 
-        for idx, (label, desc) in enumerate(options):
-            is_selected = (idx == current_idx)
-            if is_selected:
-                pointer = "[bold #E5C07B] > [/bold #E5C07B]"
-                num_str = f"[bold #E5C07B][{idx + 1}][/bold #E5C07B]"
-                label_str = f"[bold #0B0E14 on #E5C07B] {label} [/bold #0B0E14 on #E5C07B]"
-                desc_str = f"[bold #E5C07B]{desc}[/bold #E5C07B]"
+                # Build menu table
+                table = Table(show_header=False, expand=True, box=None, padding=(0, 1))
+                table.add_column("Pointer", width=3, style="bold")
+                table.add_column("Number", width=4, style="dim")
+                table.add_column("Action", style="bold")
+                table.add_column("Details")
+
+                for idx, (label, desc) in enumerate(options):
+                    is_selected = (idx == current_idx)
+                    if is_selected:
+                        pointer = "[bold #E5C07B] > [/bold #E5C07B]"
+                        num_str = f"[bold #E5C07B][{idx + 1}][/bold #E5C07B]"
+                        label_str = f"[bold #0B0E14 on #E5C07B] {label} [/bold #0B0E14 on #E5C07B]"
+                        desc_str = f"[bold #E5C07B]{desc}[/bold #E5C07B]"
+                    else:
+                        pointer = "   "
+                        num_str = f"[dim][{idx + 1}][/dim]"
+                        label_str = f"[white]{label}[/white]"
+                        desc_str = f"[dim]{desc}[/dim]"
+
+                    table.add_row(pointer, num_str, label_str, desc_str)
+
+                instructions = "[dim]Navigate: [bold #56B6C2]UP / DOWN Arrows[/bold #56B6C2]  |  Select: [bold #56B6C2]ENTER / SPACE[/bold #56B6C2]"
+                if allow_cancel:
+                    instructions += "  |  Back: [bold #56B6C2]ESC / B[/bold #56B6C2][/dim]"
+                else:
+                    instructions += "  |  Quit: [bold #56B6C2]Q[/bold #56B6C2][/dim]"
+
+                panel = Panel(
+                    table,
+                    title=f"[bold]{title}[/bold]",
+                    subtitle=instructions,
+                    border_style=border_style,
+                    padding=(0, 1)
+                )
+
+                console.print(panel)
+
+            frame = capture.get()
+
+            # Atomic frame write:
+            # Reposition cursor to top-left (\033[H)
+            # Write full frame in single atomic operation
+            # Erase trailing lines (\033[J)
+            # This completely eliminates black-screen flashing / flickering.
+            if first_render:
+                sys.stdout.write("\033[2J\033[H" + frame + "\033[J")
+                first_render = False
             else:
-                pointer = "   "
-                num_str = f"[dim][{idx + 1}][/dim]"
-                label_str = f"[white]{label}[/white]"
-                desc_str = f"[dim]{desc}[/dim]"
+                sys.stdout.write("\033[H" + frame + "\033[J")
+            sys.stdout.flush()
 
-            table.add_row(pointer, num_str, label_str, desc_str)
+            key = get_key()
 
-        instructions = "[dim]Navigate: [bold #56B6C2]UP / DOWN Arrows[/bold #56B6C2]  |  Select: [bold #56B6C2]ENTER / SPACE[/bold #56B6C2]"
-        if allow_cancel:
-            instructions += "  |  Back: [bold #56B6C2]ESC / B[/bold #56B6C2][/dim]"
-        else:
-            instructions += "  |  Quit: [bold #56B6C2]Q[/bold #56B6C2][/dim]"
-
-        panel = Panel(
-            table,
-            title=f"[bold]{title}[/bold]",
-            subtitle=instructions,
-            border_style=border_style,
-            padding=(0, 1)
-        )
-
-        console.print(panel)
-
-        key = get_key()
-
-        if key == "UP":
-            current_idx = (current_idx - 1) % len(options)
-        elif key == "DOWN":
-            current_idx = (current_idx + 1) % len(options)
-        elif key in ("ENTER", "SPACE"):
-            return current_idx
-        elif key in ("ESC", "b", "B"):
-            if allow_cancel:
+            if key == "UP":
+                current_idx = (current_idx - 1) % len(options)
+            elif key == "DOWN":
+                current_idx = (current_idx + 1) % len(options)
+            elif key in ("ENTER", "SPACE"):
+                return current_idx
+            elif key in ("ESC", "b", "B"):
+                if allow_cancel:
+                    return len(options) - 1
+                # If cancel is not allowed (e.g. Dashboard), do not exit!
+            elif key in ("q", "Q"):
                 return len(options) - 1
-            # If cancel is not allowed (e.g. Dashboard), do not exit!
-        elif key in ("q", "Q"):
-            if not allow_cancel:
-                # In Dashboard, pressing Q selects Quit
-                return len(options) - 1
-            else:
-                return len(options) - 1
-        elif key.isdigit():
-            # Check 1-based digit shortcut
-            digit_val = int(key) - 1
-            if 0 <= digit_val < len(options):
-                return digit_val
+            elif key.isdigit():
+                # Check 1-based digit shortcut
+                digit_val = int(key) - 1
+                if 0 <= digit_val < len(options):
+                    return digit_val
+    finally:
+        # Restore cursor visibility
+        sys.stdout.write("\033[?25h")
+        sys.stdout.flush()

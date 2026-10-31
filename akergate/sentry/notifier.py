@@ -133,3 +133,44 @@ def delete_telegram_webhook(bot_token: str) -> tuple[bool, str]:
             return False, data.get("description", "Failed to delete webhook.")
     except Exception as e:
         return False, str(e)
+
+def set_telegram_bot_commands(bot_token: str) -> tuple[bool, str]:
+    """
+    Registers the command palette and menu button with Telegram Bot API.
+    Enables instant interactive popup suggestions when user types '/'.
+    """
+    if not bot_token:
+        return False, "Missing bot token."
+
+    commands = [
+        {"command": "otp", "description": "Generate 7-digit AkerGate OTP code"},
+        {"command": "status", "description": "Check timing & window synchronization"},
+        {"command": "help", "description": "Show commands list and info"},
+        {"command": "start", "description": "Initialize AkerGate bot session"}
+    ]
+
+    try:
+        # 1. Register commands list
+        cmd_url = f"https://api.telegram.org/bot{bot_token}/setMyCommands"
+        cmd_payload = {"commands": commands}
+        cmd_data = json.dumps(cmd_payload).encode("utf-8")
+        cmd_req = urllib.request.Request(cmd_url, data=cmd_data, headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(cmd_req, timeout=10) as resp:
+            res_data = json.loads(resp.read().decode("utf-8"))
+            if not res_data.get("ok"):
+                return False, res_data.get("description", "Failed to register commands.")
+
+        # 2. Register Chat Menu Button (persistent '/' button)
+        menu_url = f"https://api.telegram.org/bot{bot_token}/setChatMenuButton"
+        menu_payload = {"menu_button": {"type": "commands"}}
+        menu_data = json.dumps(menu_payload).encode("utf-8")
+        menu_req = urllib.request.Request(menu_url, data=menu_data, headers={"Content-Type": "application/json"})
+        try:
+            with urllib.request.urlopen(menu_req, timeout=10) as resp2:
+                pass
+        except Exception:
+            pass
+
+        return True, "Bot commands and menu button registered successfully."
+    except Exception as e:
+        return False, str(e)

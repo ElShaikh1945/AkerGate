@@ -168,9 +168,8 @@ def save_tgcloud_credentials(token: str) -> Tuple[bool, str]:
     if not TGCLOUD_TOKEN_FORMAT.match(clean_token):
         return False, "Invalid token format. Expected 'app<id>:<secret>' (e.g. app123456:aBcDeF...)."
 
-    creds_dir = TGCLOUD_DIR / ".tgcloud"
-    creds_dir.mkdir(parents=True, exist_ok=True)
-    creds_file = creds_dir / "credentials"
+    creds_file = get_tgcloud_credentials_path()
+    creds_file.parent.mkdir(parents=True, exist_ok=True)
 
     try:
         data = {"token": clean_token}

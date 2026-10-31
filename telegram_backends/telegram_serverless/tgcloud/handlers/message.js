@@ -91,6 +91,21 @@ export default async function handleMessage(message) {
   const secondsRemaining = CONFIG.INTERVAL_SECONDS - (now % CONFIG.INTERVAL_SECONDS);
 
   if (rawText === "/start" || rawText === "/help") {
+    // Ensure interactive slash command menu and persistent menu button are registered
+    try {
+      await api.setMyCommands({
+        commands: [
+          { command: "otp", description: "Generate 7-digit AkerGate OTP code" },
+          { command: "status", description: "Check timing & window synchronization" },
+          { command: "help", description: "Show commands list and info" },
+          { command: "start", description: "Initialize AkerGate bot session" }
+        ]
+      });
+      await api.setChatMenuButton({
+        menu_button: { type: "commands" }
+      });
+    } catch (_) {}
+
     const welcome = [
       "*[+] AKERGATE TELEGRAM SERVERLESS BOT*",
       "────────────────────────",

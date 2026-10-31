@@ -207,5 +207,32 @@ class TestAkerGateCore(unittest.TestCase):
         self.assertIsNotNone(rich_b)
         self.assertIn("Muhammad El-Shaikh", rich_b.plain)
 
+    def test_tgcloud_credentials_handling(self):
+        from akergate.core.serverless_deployer import (
+            save_tgcloud_credentials,
+            load_tgcloud_credentials,
+            delete_tgcloud_credentials
+        )
+
+        # Invalid token format
+        ok, msg = save_tgcloud_credentials("invalid_token_123")
+        self.assertFalse(ok)
+        self.assertIn("Invalid token format", msg)
+
+        # Valid token format
+        valid_tok = "app998877:abcdefABCDEF123456_-"
+        ok, msg = save_tgcloud_credentials(valid_tok)
+        self.assertTrue(ok)
+        self.assertIn("app998877", msg)
+
+        # Load back
+        loaded = load_tgcloud_credentials()
+        self.assertEqual(loaded, valid_tok)
+
+        # Cleanup
+        del_ok, del_msg = delete_tgcloud_credentials()
+        self.assertTrue(del_ok)
+        self.assertIsNone(load_tgcloud_credentials())
+
 if __name__ == "__main__":
     unittest.main()

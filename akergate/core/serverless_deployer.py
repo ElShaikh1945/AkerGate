@@ -8,6 +8,8 @@ Zero external heavy dependencies. Zero emojis.
 
 import os
 import sys
+import json
+import re
 import subprocess
 from pathlib import Path
 from typing import Tuple, Optional
@@ -122,6 +124,106 @@ const EMBEDDED_INTERVAL_SECONDS = "{interval}";
     except Exception as e:
         return False, f"Failed to generate worker.bundle.js: {e}"
 
+TGCLOUD_TOKEN_FORMAT = re.compile(r"^app\d+:[A-Za-z0-9_-]+$")
+
+def get_tgcloud_credentials_path() -> Path:
+    """Returns absolute path to tgcloud credentials file."""
+    return TGCLOUD_DIR / ".tgcloud" / "credentials"
+
+def load_tgcloud_credentials() -> Optional[str]:
+    """
+    Loads saved token from .tgcloud/credentials or config.
+    Returns None if missing.
+    """
+    creds_file = get_tgcloud_credentials_path()
+    if creds_file.exists():
+        try:
+            data = json.loads(creds_file.read_text(encoding="utf-8"))
+            token = data.get("token")
+            if token and isinstance(token, str):
+                return token.strip()
+        except Exception:
+            pass
+
+    cfg = load_config()
+    stored = cfg.get("telegram", {}).get("tgcloud_token")
+    if stored and isinstance(stored, str):
+        return stored.strip()
+    return None
+
+def save_tgcloud_credentials(token: str) -> Tuple[bool, str]:
+    """
+    Saves Telegram Serverless CLI access token to .tgcloud/credentials
+    and local config with strict 0600 permissions.
+    """
+    clean_token = token.strip()
+    if not TGCLOUD_TOKEN_FORMAT.match(clean_token):
+        return False, "Invalid token format. Expected 'app<id>:<secret>' (e.g. app123456:aBcDeF...)."
+
+    creds_dir = TGCLOUD_DIR / ".tgcloud"
+    creds_dir.mkdir(parents=True, exist_ok=True)
+    creds_file = creds_dir / "credentials"
+
+    try:
+        data = {"token": clean_token}
+        creds_file.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+        try:
+            os.chmod(str(creds_file), 0o600)
+        except OSError:
+            pass
+
+        # Also persist to config
+        cfg = load_config()
+        tg_cfg = cfg.setdefault("telegram", {})
+        tg_cfg["tgcloud_token"] = clean_token
+        save_config(cfg)
+
+        app_id = clean_token.split(":", 1)[0]
+        return True, f"Successfully linked to Telegram Serverless ({app_id})"
+    except Exception as e:
+        return False, f"Failed to save credentials: {e}"
+
+def delete_tgcloud_credentials() -> Tuple[bool, str]:
+    """Removes stored Telegram Serverless CLI credentials."""
+    creds_file = get_tgcloud_credentials_path()
+    if creds_file.exists():
+        try:
+            creds_file.unlink()
+        except OSError as e:
+            return False, f"Failed to remove credentials file: {e}"
+
+    cfg = load_config()
+    tg_cfg = cfg.setdefault("telegram", {})
+    if "tgcloud_token" in tg_cfg:
+        del tg_cfg["tgcloud_token"]
+        save_config(cfg)
+    return True, "Telegram Serverless credentials removed."
+
+def run_tgcloud_interactive_login() -> Tuple[bool, str]:
+    """
+    Spawns interactive 'npx @tgcloud/cli login' attached to the user terminal.
+    Allows user to complete official login directly without leaving AkerGate.
+    """
+    try:
+        res = subprocess.run(
+            ["npx", "--yes", "@tgcloud/cli", "login"],
+            cwd=str(TGCLOUD_DIR)
+        )
+        saved_tok = load_tgcloud_credentials()
+        if saved_tok:
+            app_id = saved_tok.split(":", 1)[0]
+            cfg = load_config()
+            tg_cfg = cfg.setdefault("telegram", {})
+            tg_cfg["tgcloud_token"] = saved_tok
+            save_config(cfg)
+            return True, f"Successfully authenticated and linked to Telegram Serverless ({app_id})"
+        elif res.returncode == 0:
+            return True, "Login completed successfully."
+        else:
+            return False, f"Login exited with code {res.returncode}"
+    except Exception as e:
+        return False, f"Interactive login failed: {e}"
+
 def run_tgcloud_push(cli_token: Optional[str] = None) -> Tuple[bool, str]:
     """
     Executes 'npx @tgcloud/cli push' in the telegram_serverless directory.
@@ -133,13 +235,9 @@ def run_tgcloud_push(cli_token: Optional[str] = None) -> Tuple[bool, str]:
         return False, sync_msg
 
     env = os.environ.copy()
-    if cli_token:
-        env["TGCLOUD_TOKEN"] = cli_token.strip()
-    else:
-        cfg = load_config()
-        stored_token = cfg.get("telegram", {}).get("tgcloud_token")
-        if stored_token:
-            env["TGCLOUD_TOKEN"] = stored_token.strip()
+    tok = cli_token or load_tgcloud_credentials()
+    if tok:
+        env["TGCLOUD_TOKEN"] = tok.strip()
 
     try:
         proc = subprocess.run(

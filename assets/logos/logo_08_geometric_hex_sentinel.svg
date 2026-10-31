@@ -1,95 +1,116 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
   <!-- Background (100% Flat Solid Color) -->
-  <rect width="500" height="500" rx="32" fill="#0C1017" />
+  <rect width="500" height="500" rx="32" fill="#0A0E17" />
 
-  <!-- Outer Defensive Hexagonal Perimeter -->
-  <polygon points="250,30 440,140 440,360 250,470 60,360 60,140" 
-           fill="#131924" stroke="#E5C07B" stroke-width="4" stroke-linejoin="round" />
-  <polygon points="250,46 424,148 424,352 250,454 76,352 76,148" 
-           fill="none" stroke="#263345" stroke-width="2" stroke-dasharray="8 6" />
+  <!-- Outer Defensive Hexagon (Mathematically Centered at x=250, y=250) -->
+  <polygon points="250,25 445,137.5 445,362.5 250,475 55,362.5 55,137.5" 
+           fill="#101622" stroke="#E5C07B" stroke-width="4" stroke-linejoin="round" />
+  <polygon points="250,42 430,146 430,354 250,458 70,354 70,146" 
+           fill="none" stroke="#222E40" stroke-width="2" stroke-dasharray="8 6" />
 
-  <!-- Twin Geometric Sentinel Lions (Aker Facets) -->
+  <!-- Apex Solar Indicator (Top Cardinal Point) -->
+  <polygon points="250,52 260,70 240,70" fill="#E5C07B" />
+
+  <!-- ==================== TWIN SENTINEL LIONS ==================== -->
+
   <!-- LEFT LION: Facing West (Yesterday / Sef) -->
   <!-- Ear -->
-  <polygon points="145,100 185,135 130,140" fill="#E5C07B" stroke="#0C1017" stroke-width="2" />
-  <polygon points="152,112 175,135 140,138" fill="#56B6C2" />
+  <polygon points="145,82 185,118 130,122" fill="#E5C07B" stroke="#0A0E17" stroke-width="2" />
+  <polygon points="152,94 175,118 140,120" fill="#56B6C2" />
 
   <!-- Forehead and Crown -->
-  <polygon points="185,135 225,120 250,145 205,170" fill="#2E3D52" stroke="#0C1017" stroke-width="2" />
-  <polygon points="185,135 205,170 145,165 130,140" fill="#E5C07B" stroke="#0C1017" stroke-width="2" />
+  <polygon points="185,118 225,102 250,128 205,154" fill="#2E3D52" stroke="#0A0E17" stroke-width="2" />
+  <polygon points="185,118 205,154 145,148 130,122" fill="#E5C07B" stroke="#0A0E17" stroke-width="2" />
 
   <!-- Snout, Bridge & Whisker Pad -->
-  <polygon points="130,140 145,165 95,180" fill="#C9A356" stroke="#0C1017" stroke-width="2" />
-  <polygon points="95,180 145,165 140,215 90,215" fill="#1E2A3A" stroke="#0C1017" stroke-width="2" />
-  <!-- Nose Tip & Snout Front -->
-  <polygon points="95,180 90,215 70,205" fill="#E5C07B" stroke="#0C1017" stroke-width="2" />
+  <polygon points="130,122 145,148 95,164" fill="#C9A356" stroke="#0A0E17" stroke-width="2" />
+  <polygon points="95,164 145,148 140,200 90,200" fill="#1A2433" stroke="#0A0E17" stroke-width="2" />
+  <!-- Nose Tip -->
+  <polygon points="95,164 90,200 68,190" fill="#E5C07B" stroke="#0A0E17" stroke-width="2" />
   <!-- Strong Lion Jaw & Chin -->
-  <polygon points="90,215 135,235 125,255 85,235" fill="#2E3D52" stroke="#0C1017" stroke-width="2" />
-  <polygon points="90,215 125,220 85,235" fill="#56B6C2" />
+  <polygon points="90,200 135,220 125,242 85,222" fill="#2E3D52" stroke="#0A0E17" stroke-width="2" />
+  <polygon points="90,200 125,206 85,222" fill="#56B6C2" />
 
-  <!-- Lion Eye (Piercing Cyan Feline Gaze) -->
-  <polygon points="118,172 136,176 122,185" fill="#56B6C2" stroke="#0C1017" stroke-width="1.5" />
-  <circle cx="125" cy="177" r="2.5" fill="#FFFFFF" />
+  <!-- Piercing Cyan Feline Eye -->
+  <polygon points="118,155 136,159 122,168" fill="#56B6C2" stroke="#0A0E17" stroke-width="1.5" />
+  <circle cx="125" cy="160" r="2.5" fill="#FFFFFF" />
 
-  <!-- Heavy Mane Facets (Neck & Shoulder Armor) -->
-  <polygon points="205,170 250,145 250,210 215,225" fill="#1A2433" stroke="#0C1017" stroke-width="2" />
-  <polygon points="145,165 205,170 215,225 155,225" fill="#E5C07B" stroke="#0C1017" stroke-width="2" />
-  <polygon points="140,215 155,225 185,280 135,265" fill="#2E3D52" stroke="#0C1017" stroke-width="2" />
-  <polygon points="215,225 250,210 250,285 185,280" fill="#C9A356" stroke="#0C1017" stroke-width="2" />
-  <polygon points="135,265 185,280 170,335 120,320" fill="#1A2433" stroke="#0C1017" stroke-width="2" />
-  <polygon points="185,280 250,285 250,345 170,335" fill="#2E3D52" stroke="#0C1017" stroke-width="2" />
+  <!-- Mane Facets (Layered Angular Armor) -->
+  <polygon points="205,154 250,128 250,195 215,210" fill="#1A2433" stroke="#0A0E17" stroke-width="2" />
+  <polygon points="145,148 205,154 215,210 155,210" fill="#E5C07B" stroke="#0A0E17" stroke-width="2" />
+  <polygon points="140,200 155,210 185,268 135,252" fill="#2E3D52" stroke="#0A0E17" stroke-width="2" />
+  <polygon points="215,210 250,195 250,272 185,268" fill="#C9A356" stroke="#0A0E17" stroke-width="2" />
+  <polygon points="135,252 185,268 170,325 120,310" fill="#1A2433" stroke="#0A0E17" stroke-width="2" />
+  <polygon points="185,268 250,272 250,335 170,325" fill="#2E3D52" stroke="#0A0E17" stroke-width="2" />
 
-  <!-- RIGHT LION: Facing East (Tomorrow / Duau) - Mirrored -->
+  <!-- RIGHT LION: Facing East (Tomorrow / Duau) - Exact Mirror -->
   <!-- Ear -->
-  <polygon points="355,100 315,135 370,140" fill="#E5C07B" stroke="#0C1017" stroke-width="2" />
-  <polygon points="348,112 325,135 360,138" fill="#56B6C2" />
+  <polygon points="355,82 315,118 370,122" fill="#E5C07B" stroke="#0A0E17" stroke-width="2" />
+  <polygon points="348,94 325,118 360,120" fill="#56B6C2" />
 
   <!-- Forehead and Crown -->
-  <polygon points="315,135 275,120 250,145 295,170" fill="#2E3D52" stroke="#0C1017" stroke-width="2" />
-  <polygon points="315,135 295,170 355,165 370,140" fill="#E5C07B" stroke="#0C1017" stroke-width="2" />
+  <polygon points="315,118 275,102 250,128 295,154" fill="#2E3D52" stroke="#0A0E17" stroke-width="2" />
+  <polygon points="315,118 295,154 355,148 370,122" fill="#E5C07B" stroke="#0A0E17" stroke-width="2" />
 
   <!-- Snout, Bridge & Whisker Pad -->
-  <polygon points="370,140 355,165 405,180" fill="#C9A356" stroke="#0C1017" stroke-width="2" />
-  <polygon points="405,180 355,165 360,215 410,215" fill="#1E2A3A" stroke="#0C1017" stroke-width="2" />
-  <!-- Nose Tip & Snout Front -->
-  <polygon points="405,180 410,215 430,205" fill="#E5C07B" stroke="#0C1017" stroke-width="2" />
+  <polygon points="370,122 355,148 405,164" fill="#C9A356" stroke="#0A0E17" stroke-width="2" />
+  <polygon points="405,164 355,148 360,200 410,200" fill="#1A2433" stroke="#0A0E17" stroke-width="2" />
+  <!-- Nose Tip -->
+  <polygon points="405,164 410,200 432,190" fill="#E5C07B" stroke="#0A0E17" stroke-width="2" />
   <!-- Strong Lion Jaw & Chin -->
-  <polygon points="410,215 365,235 375,255 415,235" fill="#2E3D52" stroke="#0C1017" stroke-width="2" />
-  <polygon points="410,215 375,220 415,235" fill="#56B6C2" />
+  <polygon points="410,200 365,220 375,242 415,222" fill="#2E3D52" stroke="#0A0E17" stroke-width="2" />
+  <polygon points="410,200 375,206 415,222" fill="#56B6C2" />
 
-  <!-- Lion Eye (Piercing Cyan Feline Gaze) -->
-  <polygon points="382,172 364,176 378,185" fill="#56B6C2" stroke="#0C1017" stroke-width="1.5" />
-  <circle cx="375" cy="177" r="2.5" fill="#FFFFFF" />
+  <!-- Piercing Cyan Feline Eye -->
+  <polygon points="382,155 364,159 378,168" fill="#56B6C2" stroke="#0A0E17" stroke-width="1.5" />
+  <circle cx="375" cy="160" r="2.5" fill="#FFFFFF" />
 
-  <!-- Heavy Mane Facets (Neck & Shoulder Armor) -->
-  <polygon points="295,170 250,145 250,210 285,225" fill="#1A2433" stroke="#0C1017" stroke-width="2" />
-  <polygon points="355,165 295,170 285,225 345,225" fill="#E5C07B" stroke="#0C1017" stroke-width="2" />
-  <polygon points="360,215 345,225 315,280 365,265" fill="#2E3D52" stroke="#0C1017" stroke-width="2" />
-  <polygon points="285,225 250,210 250,285 315,280" fill="#C9A356" stroke="#0C1017" stroke-width="2" />
-  <polygon points="365,265 315,280 330,335 380,320" fill="#1A2433" stroke="#0C1017" stroke-width="2" />
-  <polygon points="315,280 250,285 250,345 330,335" fill="#2E3D52" stroke="#0C1017" stroke-width="2" />
+  <!-- Mane Facets (Layered Angular Armor) -->
+  <polygon points="295,154 250,128 250,195 285,210" fill="#1A2433" stroke="#0A0E17" stroke-width="2" />
+  <polygon points="355,148 295,154 285,210 345,210" fill="#E5C07B" stroke="#0A0E17" stroke-width="2" />
+  <polygon points="360,200 345,210 315,268 365,252" fill="#2E3D52" stroke="#0A0E17" stroke-width="2" />
+  <polygon points="285,210 250,195 250,272 315,268" fill="#C9A356" stroke="#0A0E17" stroke-width="2" />
+  <polygon points="365,252 315,268 330,325 380,310" fill="#1A2433" stroke="#0A0E17" stroke-width="2" />
+  <polygon points="315,268 250,272 250,335 330,325" fill="#2E3D52" stroke="#0A0E17" stroke-width="2" />
 
-  <!-- Central Horizon Security Vault Keystone -->
-  <polygon points="250,175 278,215 278,285 250,325 222,285 222,215" 
-           fill="#0C1017" stroke="#56B6C2" stroke-width="3" stroke-linejoin="round" />
+  <!-- ==================== CENTRAL HORIZON VAULT KEYSTONE ==================== -->
+  <polygon points="250,160 280,202 280,274 250,316 220,274 220,202" 
+           fill="#0A0E17" stroke="#56B6C2" stroke-width="3" stroke-linejoin="round" />
   
-  <!-- Cryptographic Keyhole Inside Keystone -->
-  <circle cx="250" cy="235" r="14" fill="#E5C07B" />
-  <polygon points="244,242 256,242 260,270 240,270" fill="#E5C07B" />
-  <circle cx="250" cy="235" r="6" fill="#0C1017" />
+  <!-- Cryptographic Keyhole -->
+  <circle cx="250,226" cy="226" r="14" fill="#E5C07B" />
+  <polygon points="244,233 256,233 260,262 240,262" fill="#E5C07B" />
+  <circle cx="250" cy="226" r="6" fill="#0A0E17" />
 
-  <!-- Multi-Factor Trinity Pins (Password, TOTP, Telegram) -->
-  <circle cx="250" cy="190" r="5" fill="#56B6C2" />
-  <circle cx="230" cy="300" r="5" fill="#56B6C2" />
-  <circle cx="270" cy="300" r="5" fill="#56B6C2" />
-  <line x1="250" y1="195" x2="250" y2="215" stroke="#56B6C2" stroke-width="2" />
-  <line x1="230" y1="295" x2="242" y2="275" stroke="#56B6C2" stroke-width="2" />
-  <line x1="270" y1="295" x2="258" y2="275" stroke="#56B6C2" stroke-width="2" />
+  <!-- Trinity Multi-Factor Circuit Pins (Password + TOTP + Telegram) -->
+  <circle cx="250" cy="178" r="5" fill="#56B6C2" />
+  <circle cx="230" cy="292" r="5" fill="#56B6C2" />
+  <circle cx="270" cy="292" r="5" fill="#56B6C2" />
+  <line x1="250" y1="183" x2="250" y2="206" stroke="#56B6C2" stroke-width="2" />
+  <line x1="230" y1="287" x2="242" y2="267" stroke="#56B6C2" stroke-width="2" />
+  <line x1="270" y1="287" x2="258" y2="267" stroke="#56B6C2" stroke-width="2" />
 
-  <!-- Lower Hex Badge Title Plaque -->
-  <polygon points="150,380 350,380 375,415 125,415" 
-           fill="#161F2E" stroke="#E5C07B" stroke-width="2" stroke-linejoin="round" />
-  <text x="250" y="404" font-family="'Segoe UI', -apple-system, Roboto, sans-serif" font-size="16" font-weight="900" letter-spacing="6" fill="#E5C07B" text-anchor="middle">AKERGATE</text>
+  <!-- Lion Sub-Base Anchor Bar -->
+  <polygon points="140,335 360,335 375,348 125,348" fill="#1A2433" stroke="#E5C07B" stroke-width="1.5" />
 
-  <text x="250" y="438" font-family="'Segoe UI', -apple-system, Roboto, sans-serif" font-size="10" font-weight="700" letter-spacing="3" fill="#56B6C2" text-anchor="middle">GEOMETRIC SENTINEL HEX</text>
+  <!-- ==================== CENTERED "AKERGATE" BADGE PLAQUE ==================== -->
+  <!-- Symmetrical Beveled Plaque (Precisely Centered at x=250, y=390) -->
+  <polygon points="130,365 370,365 395,390 370,415 130,415 105,390" 
+           fill="#141B26" stroke="#E5C07B" stroke-width="2.5" stroke-linejoin="round" />
+  
+  <!-- Inner Subtle Accent Border -->
+  <polygon points="134,370 366,370 388,390 366,410 134,410 112,390" 
+           fill="none" stroke="#222E40" stroke-width="1" />
+
+  <!-- AKERGATE Wordmark (Centered, Solid Gold, Bold) -->
+  <text x="250" y="398" 
+        font-family="'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif" 
+        font-size="21" 
+        font-weight="900" 
+        letter-spacing="8" 
+        fill="#E5C07B" 
+        text-anchor="middle">AKERGATE</text>
+
+  <!-- Bottom Apex Accent -->
+  <polygon points="250,448 260,430 240,430" fill="#E5C07B" />
 </svg>

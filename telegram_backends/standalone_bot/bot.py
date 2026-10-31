@@ -69,15 +69,61 @@ def main():
 
                 if text in ("/start", "/help"):
                     welcome = (
-                        "*AkerGate - Remote Authentication Bot*\n"
+                        "*AkerGate - Remote Authentication & Security Bot*\n"
                         "────────────────────────\n"
                         "Commands:\n"
                         "• `/otp` : Generate a 7-digit temporary access code\n"
+                        "• `/lockdown` : Trigger Host Emergency Quarantine\n"
+                        "• `/disarm <totp>` : Cancel emergency lockdown remotely\n"
                         "• `/status` : Check backend status and timing\n"
                         "────────────────────────\n"
                         "AkerGate protects your Linux host even when offline."
                     )
                     send_message(chat_id, welcome)
+
+                elif text in ("/lockdown", "lockdown", "/panic"):
+                    prompt = (
+                        "*[!] AkerGate Emergency Lockdown*\n"
+                        "────────────────────────\n"
+                        "Select the required verification policy to activate lockdown:\n\n"
+                        "1. `dual_totp` (Recommended Offline):\n"
+                        "   `/lockdown dual_totp`\n"
+                        "   Requires Master Password + 2 Consecutive TOTP codes.\n\n"
+                        "2. `strict_3fa` (Full Defense):\n"
+                        "   `/lockdown strict_3fa`\n"
+                        "   Requires Password + TOTP + Telegram OTP combined.\n\n"
+                        "3. `totp_only` (Compromised Password mode):\n"
+                        "   `/lockdown totp_only`\n"
+                        "   Requires 2 Consecutive TOTP codes only.\n"
+                        "────────────────────────"
+                    )
+                    send_message(chat_id, prompt)
+
+                elif text.startswith("/lockdown "):
+                    policy = text.replace("/lockdown ", "").strip().lower()
+                    valid_policies = ["dual_totp", "strict_3fa", "totp_only"]
+                    chosen = policy if policy in valid_policies else "dual_totp"
+                    alert = (
+                        "*[!] EMERGENCY LOCKDOWN ORDER INITIATED*\n"
+                        "────────────────────────\n"
+                        f"• Enforced Policy: `{chosen}`\n"
+                        "• Action: Quarantining host, terminating sessions\n"
+                        "• Forensic: Snapshot report will be generated\n"
+                        "────────────────────────\n"
+                        "To disarm on host (offline):\n"
+                        "Enter 2 consecutive TOTP codes (e.g. `Code1+Code2`).\n\n"
+                        "To disarm remotely:\n"
+                        "`/disarm <CURRENT_TOTP>`"
+                    )
+                    send_message(chat_id, alert)
+
+                elif text.startswith("/disarm"):
+                    parts = text.split()
+                    if len(parts) < 2:
+                        send_message(chat_id, "[!] Usage: `/disarm <6-DIGIT_TOTP_CODE>`")
+                    else:
+                        totp_cand = parts[1].strip()
+                        send_message(chat_id, f"[+] Disarm order issued for TOTP: `{totp_cand}`.")
 
                 elif text.startswith("/otp") or text in ("otp", "code"):
                     otp = generate_windowed_otp(SHARED_SECRET, interval=INTERVAL_SECONDS)

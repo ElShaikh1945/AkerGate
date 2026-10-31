@@ -23,6 +23,13 @@ from akergate.core.windowed_otp import (
 )
 from akergate.core.storage import burn_token, is_token_burned
 from akergate.pam.patcher import patch_pam, unpatch_pam, is_pam_patched
+from akergate.core.lockdown import (
+    capture_forensic_snapshot,
+    trigger_lockdown,
+    disarm_lockdown,
+    is_lockdown_active,
+    verify_consecutive_totp
+)
 
 class TestAkerGateCore(unittest.TestCase):
 
@@ -106,6 +113,37 @@ class TestAkerGateCore(unittest.TestCase):
             un_ok, un_msg = unpatch_pam(mock_pam, backup_dir=mock_backup)
             self.assertTrue(un_ok, un_msg)
             self.assertFalse(is_pam_patched(mock_pam))
+
+    def test_forensic_snapshot_and_lockdown(self):
+        # 1. Test capturing snapshot
+        report_path = capture_forensic_snapshot(trigger_source="test_suite")
+        self.assertTrue(report_path.exists())
+        content = report_path.read_text(encoding="utf-8")
+        self.assertIn("AkerGate Incident & Forensic Snapshot Report", content)
+        self.assertIn("Metadata", content)
+        
+        # 2. Test lockdown trigger
+        ok, r_path = trigger_lockdown(policy="dual_totp", trigger_source="test_panic")
+        self.assertTrue(ok)
+        self.assertTrue(is_lockdown_active())
+        
+        # 3. Test consecutive TOTP verification
+        secret = generate_totp_secret()
+        now = time.time()
+        c1 = compute_totp(secret, timestamp=now)
+        c2 = compute_totp(secret, timestamp=now + 30) # Next 30s step
+        
+        # Combined 12 digits
+        combined = f"{c1}{c2}"
+        self.assertTrue(verify_consecutive_totp(secret, combined))
+        
+        # Invalid combined
+        self.assertFalse(verify_consecutive_totp(secret, "000000111111"))
+        
+        # 4. Test disarming
+        disarmed = disarm_lockdown()
+        self.assertTrue(disarmed)
+        self.assertFalse(is_lockdown_active())
 
 if __name__ == "__main__":
     unittest.main()

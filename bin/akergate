@@ -29,6 +29,9 @@ def print_help():
     print("  qr          Display TOTP QR code in terminal")
     print("  patch       Enable AkerGate in PAM (/etc/pam.d/common-auth)")
     print("  unpatch     Disable AkerGate and restore original PAM")
+    print("  lockdown    Trigger emergency quarantine (dual_totp | strict_3fa | totp_only)")
+    print("  disarm      Disarm emergency lockdown and restore flexible multi-auth")
+    print("  report      Display latest forensic incident report")
     print("  sentry      Run background Sentry event monitor daemon")
     print("  help        Show this help message")
 
@@ -70,6 +73,29 @@ def main():
             sys.exit(1)
         ok, msg = unpatch_pam()
         print(f"[{'+' if ok else '!'}] {msg}")
+    elif cmd == "lockdown":
+        from akergate.core.lockdown import trigger_lockdown
+        policy = sys.argv[2] if len(sys.argv) > 2 else "dual_totp"
+        ok, report = trigger_lockdown(policy=policy, trigger_source="cli_command")
+        if ok:
+            print(f"[+] Emergency lockdown activated with policy '{policy}'.")
+            print(f"[+] Forensic snapshot created at: {report}")
+        else:
+            print(f"[!] Failed to trigger lockdown: {report}")
+    elif cmd == "disarm":
+        from akergate.core.lockdown import disarm_lockdown
+        if disarm_lockdown():
+            print("[+] Emergency lockdown disarmed. Flexible multi-auth restored.")
+        else:
+            print("[!] Failed to disarm lockdown.")
+    elif cmd == "report":
+        from akergate.core.lockdown import get_lockdown_state
+        state = get_lockdown_state()
+        rep_path = state.get("report_path")
+        if rep_path and Path(rep_path).exists():
+            print(Path(rep_path).read_text(encoding="utf-8"))
+        else:
+            print("[!] No incident report available.")
     elif cmd == "sentry":
         from akergate.sentry.daemon import run_sentry_daemon
         run_sentry_daemon()

@@ -18,8 +18,12 @@
 
 * **Unified Input Prompt:** Enter either your permanent master password, a 6-digit TOTP code, or a 7-digit Telegram OTP into the single standard `Password:` prompt.
 * **100% Offline Telegram OTP Verification:** The host does not need an active internet connection to verify Telegram OTPs. AkerGate uses the motherboard Hardware Real-Time Clock (RTC) combined with windowed HMAC verification.
+* **Emergency Panic Lockdown & Incident Snapshot:** Remotely or automatically isolate and quarantine the host. Captures a forensic Markdown report documenting running processes, open network sockets, active sessions, and recent shell commands.
+* **Offline Strict Recovery (Dual Consecutive TOTP):** Under emergency lockdown without internet, the host can be safely disarmed by requiring two consecutive valid TOTP codes (entered together e.g. `Code1+Code2` or sequentially across prompts within 60 seconds).
+* **Customizable Defense Policies:** Choose your strict quarantine policy via Telegram or TUI: `dual_totp` (Offline), `strict_3fa` (Password + TOTP + Telegram OTP), or `totp_only`.
+* **Automatic Brute-Force Defense:** Sentry automatically triggers lockdown if 5 consecutive failed login attempts occur within 120 seconds.
 * **Atomic Token Burning (Anti-Replay):** Every temporary token is burned and invalidated immediately upon first entry using kernel-level atomic locks (`fcntl.flock`).
-* **Interactive Terminal User Interface (TUI):** A complete keyboard-driven terminal console with real-time status dashboards, service toggles, log streams, and **phone-scannable Unicode QR codes rendered directly in your terminal**.
+* **Interactive Terminal User Interface (TUI):** A complete keyboard-driven terminal console with real-time status dashboards, service toggles, log streams, incident reports, and **phone-scannable Unicode QR codes rendered directly in your terminal**.
 * **30-Second Failsafe Auto-Rollback:** When applying PAM changes, a failsafe countdown prevents lockouts. If not confirmed, AkerGate automatically reverts to original PAM configuration.
 * **Sentry Event Monitor & Offline Queue:** Continuous tracking of logins, sessions, and failed attempts. If an authentication event occurs while offline, Sentry queues the alert and sends it to Telegram the moment an internet connection is re-established.
 * **Zero External Dependencies for Core PAM:** The PAM authentication hook runs on pure standard library Python, eliminating runtime breakage risks from package managers or virtual environments.

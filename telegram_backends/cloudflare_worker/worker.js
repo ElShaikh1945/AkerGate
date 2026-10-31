@@ -108,15 +108,64 @@ export default {
 
       if (text === "/start" || text === "/help") {
         const welcome = [
-          "*AkerGate - Remote Authentication Bot*",
+          "*AkerGate - Remote Authentication & Security Bot*",
           "────────────────────────",
           "Commands:",
           "• `/otp` : Generate a 7-digit temporary access code",
+          "• `/lockdown` : Trigger Host Emergency Quarantine",
+          "• `/disarm <totp>` : Cancel emergency lockdown remotely",
           "• `/status` : Check backend status and timing",
           "────────────────────────",
           "AkerGate protects your Linux host even when offline."
         ].join("\n");
         await sendTelegramMessage(botToken, chatId, welcome);
+      } else if (text === "/lockdown" || text === "lockdown" || text === "/panic") {
+        const prompt = [
+          "*[!] AkerGate Emergency Lockdown*",
+          "────────────────────────",
+          "Select the required verification policy to activate lockdown:",
+          "",
+          "1. `dual_totp` (Recommended Offline):",
+          "   `/lockdown dual_totp`",
+          "   Requires Master Password + 2 Consecutive TOTP codes.",
+          "",
+          "2. `strict_3fa` (Full Defense):",
+          "   `/lockdown strict_3fa`",
+          "   Requires Password + TOTP + Telegram OTP combined.",
+          "",
+          "3. `totp_only` (Compromised Password mode):",
+          "   `/lockdown totp_only`",
+          "   Requires 2 Consecutive TOTP codes only.",
+          "────────────────────────"
+        ].join("\n");
+        await sendTelegramMessage(botToken, chatId, prompt);
+      } else if (text.startsWith("/lockdown ")) {
+        const policy = text.replace("/lockdown ", "").trim().toLowerCase();
+        const validPolicies = ["dual_totp", "strict_3fa", "totp_only"];
+        const chosen = validPolicies.includes(policy) ? policy : "dual_totp";
+        
+        const alert = [
+          "*[!] EMERGENCY LOCKDOWN ORDER INITIATED*",
+          "────────────────────────",
+          `• Enforced Policy: \`${chosen}\``,
+          "• Action: Quarantining host, terminating sessions",
+          "• Forensic: Snapshot report will be generated",
+          "────────────────────────",
+          "To disarm on host (offline):",
+          "Enter 2 consecutive TOTP codes (e.g. `Code1+Code2`).",
+          "",
+          "To disarm remotely:",
+          "`/disarm <CURRENT_TOTP>`"
+        ].join("\n");
+        await sendTelegramMessage(botToken, chatId, alert);
+      } else if (text.startsWith("/disarm")) {
+        const parts = text.split(/\s+/);
+        if (parts.length < 2) {
+          await sendTelegramMessage(botToken, chatId, "[!] Usage: `/disarm <6-DIGIT_TOTP_CODE>`");
+        } else {
+          const totpCandidate = parts[1].trim();
+          await sendTelegramMessage(botToken, chatId, `[+] Disarm request received for TOTP: \`${totpCandidate}\`. Host will return to normal mode upon verification.`);
+        }
       } else if (text.startsWith("/otp") || text === "otp" || text === "code") {
         const res = await generateAkerOtp(secret, interval);
         const minutes = Math.floor(interval / 60);

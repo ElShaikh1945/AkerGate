@@ -32,6 +32,13 @@ from akergate.config import (
 from akergate.core.totp import generate_totp_secret, verify_totp, compute_totp, build_otpauth_uri
 from akergate.core.windowed_otp import generate_telegram_secret, verify_windowed_otp, generate_windowed_otp
 from akergate.core.storage import get_totp_secret, set_totp_secret, get_telegram_secret, set_telegram_secret
+from akergate.core.lockdown import (
+    is_lockdown_active,
+    get_lockdown_state,
+    trigger_lockdown,
+    disarm_lockdown,
+    POLICIES
+)
 from akergate.pam.patcher import is_pam_patched, patch_pam, unpatch_pam
 from akergate.pam.rollback import run_failsafe_test
 from akergate.tui.qr_render import generate_terminal_qr
@@ -50,6 +57,7 @@ def print_header(active_tab: str = "Dashboard"):
         ("4", "Telegram"),
         ("5", "Sentry"),
         ("6", "Audit Logs"),
+        ("7", "Lockdown"),
         ("Q", "Quit")
     ]
     
@@ -448,6 +456,72 @@ def render_audit_logs():
     Prompt.ask("\nPress Enter to return to Dashboard")
 
 # ─────────────────────────────────────────────────────────────────────────────
+# TAB 7: EMERGENCY LOCKDOWN & PANIC CONTROLS
+# ─────────────────────────────────────────────────────────────────────────────
+def render_lockdown():
+    active = is_lockdown_active()
+    state = get_lockdown_state()
+    
+    if active:
+        status_banner = "[bold white on red] EMERGENCY LOCKDOWN ACTIVE [/bold white on red]"
+        policy_name = POLICIES.get(state.get("policy", ""), state.get("policy", ""))
+        details = (
+            f"• Status: {status_banner}\n"
+            f"• Enforced Policy: [bold cyan]{policy_name}[/bold cyan]\n"
+            f"• Trigger Source: `{state.get('trigger_source', 'unknown')}`\n"
+            f"• Incident Time: `{state.get('iso_time', 'unknown')}`\n"
+            f"• Forensic Report: `{state.get('report_path', 'None')}`\n\n"
+            "[bold yellow]Standard 1-token authentication is suspended.[/bold yellow]\n"
+            "Offline Recovery requires entering two consecutive 6-digit TOTP codes."
+        )
+    else:
+        status_banner = "[bold green]NORMAL - SYSTEM SECURE[/bold green]"
+        details = (
+            f"• Status: {status_banner}\n"
+            "• Mode: Flexible Multi-Auth (Password / TOTP / Telegram OTP)\n"
+            "• Automatic Brute-Force Trigger: Enabled (Breach at 5 consecutive failures)"
+        )
+        
+    console.print(Panel(details, title="[bold]Host Quarantine & Defense Console[/bold]", border_style="red" if active else "green"))
+    
+    console.print("\n[bold]Actions:[/bold]")
+    if active:
+        console.print("  [D] Disarm Lockdown (Return to Normal)")
+    else:
+        console.print("  [1] Trigger Dual-TOTP Lockdown (Recommended Offline Recovery)")
+        console.print("  [2] Trigger Strict 3FA Lockdown (Password + TOTP + Telegram OTP)")
+        console.print("  [3] Trigger TOTP Only Lockdown")
+    console.print("  [V] View Latest Forensic Incident Report")
+    console.print("  [B] Back to Dashboard")
+    
+    allowed = ["d", "D", "v", "V", "b", "B"] if active else ["1", "2", "3", "v", "V", "b", "B"]
+    choice = Prompt.ask("\nSelect action", choices=allowed, default="b")
+    
+    if choice in ("1", "2", "3"):
+        policy_map = {"1": "dual_totp", "2": "strict_3fa", "3": "totp_only"}
+        pol = policy_map[choice]
+        if Confirm.ask(f"Confirm emergency quarantine with policy '{pol}'?"):
+            ok, report = trigger_lockdown(policy=pol, trigger_source="tui_manual")
+            if ok:
+                console.print(f"[+] Emergency lockdown activated. Forensic report: {report}", style="bold red")
+            time.sleep(2)
+            
+    elif choice in ("d", "D"):
+        if Confirm.ask("Disarm emergency lockdown now?"):
+            if disarm_lockdown():
+                console.print("[+] Lockdown disarmed. Flexible multi-auth restored.", style="bold green")
+            time.sleep(1)
+            
+    elif choice in ("v", "V"):
+        rep_path = state.get("report_path")
+        if rep_path and Path(rep_path).exists():
+            content = Path(rep_path).read_text(encoding="utf-8")
+            console.print(Panel(content[:3000], title="Forensic Incident Report (Excerpt)", border_style="yellow"))
+        else:
+            console.print("[dim]No incident report found.[/dim]")
+        Prompt.ask("\nPress Enter to return")
+
+# ─────────────────────────────────────────────────────────────────────────────
 # MAIN TUI LOOP
 # ─────────────────────────────────────────────────────────────────────────────
 def main_tui():
@@ -459,8 +533,8 @@ def main_tui():
         
         if active_tab == "Dashboard":
             render_dashboard()
-            console.print("\n[bold]Select view [1-6] or [Q] to quit:[/bold]")
-            key = Prompt.ask("Action", choices=["1", "2", "3", "4", "5", "6", "q", "Q"], default="1")
+            console.print("\n[bold]Select view [1-7] or [Q] to quit:[/bold]")
+            key = Prompt.ask("Action", choices=["1", "2", "3", "4", "5", "6", "7", "q", "Q"], default="1")
             
             if key == "1": active_tab = "Dashboard"
             elif key == "2": active_tab = "Services"
@@ -468,6 +542,7 @@ def main_tui():
             elif key == "4": active_tab = "Telegram"
             elif key == "5": active_tab = "Sentry"
             elif key == "6": active_tab = "Audit Logs"
+            elif key == "7": active_tab = "Lockdown"
             elif key in ("q", "Q"): break
             
         elif active_tab == "Services":
@@ -488,6 +563,10 @@ def main_tui():
             
         elif active_tab == "Audit Logs":
             render_audit_logs()
+            active_tab = "Dashboard"
+            
+        elif active_tab == "Lockdown":
+            render_lockdown()
             active_tab = "Dashboard"
 
 if __name__ == "__main__":

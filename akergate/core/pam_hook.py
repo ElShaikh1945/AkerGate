@@ -18,6 +18,12 @@ from akergate.core.storage import (
     burn_token,
     log_event
 )
+from akergate.core.lockdown import (
+    is_lockdown_active,
+    get_lockdown_state,
+    disarm_lockdown,
+    verify_consecutive_totp
+)
 
 def main():
     # Retrieve environment variables set by pam_exec
@@ -36,6 +42,39 @@ def main():
         sys.exit(1)
         
     config = load_config()
+    
+    # Check if Host is currently under EMERGENCY LOCKDOWN
+    if is_lockdown_active():
+        state = get_lockdown_state()
+        policy = state.get("policy", "dual_totp")
+        totp_secret = get_totp_secret()
+        
+        # Under lockdown, standard single-token entry is suspended!
+        # Offline recovery requires two consecutive TOTP codes
+        if totp_secret and verify_consecutive_totp(totp_secret, token):
+            disarm_lockdown()
+            log_event("auth_success", pam_user, pam_service, "lockdown_disarmed_dual_totp", True)
+            sys.exit(0)
+            
+        # Also check if user entered Telegram OTP + TOTP combined (strict_3fa)
+        tg_secret = get_telegram_secret()
+        if policy == "strict_3fa" and totp_secret and tg_secret:
+            # Token format: 7 digits Telegram OTP + 6 digits TOTP (13 digits total)
+            cleaned = token.replace(" ", "").replace("+", "")
+            if len(cleaned) == 13 and cleaned.isdigit():
+                tg_part = cleaned[:7]
+                totp_part = cleaned[7:]
+                valid_tg, tg_id = verify_windowed_otp(tg_secret, tg_part)
+                valid_totp, _ = verify_totp(totp_secret, totp_part)
+                if valid_tg and valid_totp and not is_token_burned(tg_id):
+                    burn_token(tg_id)
+                    disarm_lockdown()
+                    log_event("auth_success", pam_user, pam_service, "lockdown_disarmed_3fa", True)
+                    sys.exit(0)
+                    
+        # Any other credential rejected under lockdown
+        log_event("auth_failure", pam_user, pam_service, "lockdown_rejected", False)
+        sys.exit(1)
     
     # Check if Multi-Auth is enabled for this service
     services_cfg = config.get("services", {})

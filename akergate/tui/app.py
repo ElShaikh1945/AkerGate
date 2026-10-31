@@ -345,6 +345,8 @@ def render_serverless_wizard():
             table.add_row("Bot Token", f"{bot_token[:8]}..." if bot_token else "[yellow]NOT CONFIGURED[/yellow]")
             table.add_row("Allowed Chat ID", str(chat_id) if chat_id else "[yellow]NOT CONFIGURED[/yellow]")
             table.add_row("Shared Secret", "[green]READY[/green]" if secret else "[yellow]NOT SET[/yellow]")
+            stored_tg_tok = tg_cfg.get("tgcloud_token", "")
+            table.add_row("tgcloud CLI Token", f"{stored_tg_tok[:8]}..." if stored_tg_tok else "[dim]NOT SET (PROMPT ON PUSH)[/dim]")
             console.print(Panel(table, title="[bold]Deployment Credentials Readiness[/bold]", border_style="cyan"))
 
         wizard_options = [
@@ -373,14 +375,27 @@ def render_serverless_wizard():
                     time.sleep(1.5)
                     continue
 
-            console.print("\n[bold cyan]Step 1: BotFather Activation[/bold cyan]")
+            console.print("\n[bold cyan]Step 1: BotFather Serverless Activation[/bold cyan]")
             console.print("1. Open Telegram and message [bold]@BotFather[/bold]")
             console.print("2. Send /mybots -> choose your bot -> [bold]Serverless[/bold] -> [bold]Turn On[/bold]")
+            console.print("3. BotFather will provide your [bold]CLI Access Token[/bold] for tgcloud.")
             confirmed = Confirm.ask("\nHave you enabled Serverless on @BotFather for your bot?")
             if not confirmed:
                 console.print("[yellow]Please enable it first in @BotFather to authorize deployments.[/yellow]")
                 time.sleep(2)
                 continue
+
+            # Check or prompt for tgcloud CLI Access Token
+            current_cli_tok = tg_cfg.get("tgcloud_token", "")
+            if not current_cli_tok:
+                console.print("\n[bold cyan]Step 2: tgcloud CLI Access Token[/bold cyan]")
+                console.print("[dim]Required for non-interactive automated push. Found in @BotFather Serverless menu.[/dim]")
+                token_input = Prompt.ask("Enter CLI Access Token (or press ENTER if already logged in via 'tgcloud login')", default="")
+                if token_input.strip():
+                    current_cli_tok = token_input.strip()
+                    tg_cfg["tgcloud_token"] = current_cli_tok
+                    config["telegram"] = tg_cfg
+                    save_config(config)
 
             console.print("\n[*] Auto-generating tgcloud configuration...", style="cyan")
             ok, msg = sync_telegram_serverless_config()
@@ -391,11 +406,9 @@ def render_serverless_wizard():
             console.print(f"[+] {msg}", style="bold green")
 
             console.print("\n[*] Pushing to Telegram Serverless (npx @tgcloud/cli push)...", style="cyan")
-            console.print("[dim]If this is your first time, you may be prompted to login with your BotFather token.[/dim]\n")
-            
             run_deploy = Confirm.ask("Execute automated deployment now?")
             if run_deploy:
-                success, output = run_tgcloud_push()
+                success, output = run_tgcloud_push(cli_token=current_cli_tok)
                 if success:
                     tg_cfg["backend"] = "telegram_serverless"
                     config["telegram"] = tg_cfg
@@ -403,7 +416,13 @@ def render_serverless_wizard():
                     console.print(f"\n[+] DEPLOYMENT SUCCEEDED!\n{output}", style="bold green")
                 else:
                     console.print(f"\n[!] Deployment Output:\n{output}", style="yellow")
-                    console.print("\n[dim]To run manually in terminal: cd telegram_backends/telegram_serverless && npx @tgcloud/cli push[/dim]")
+                    if "No CLI access token found" in output:
+                        console.print("\n[bold red]Authentication Required:[/bold red]")
+                        console.print("1. In @BotFather, select your bot -> Serverless -> copy CLI Access Token.")
+                        console.print("2. Re-run deployment and paste the token, or run terminal login once:")
+                        console.print("   [bold cyan]cd telegram_backends/telegram_serverless && npx @tgcloud/cli login[/bold cyan]")
+                    else:
+                        console.print("\n[dim]To run manually in terminal: cd telegram_backends/telegram_serverless && npx @tgcloud/cli push[/dim]")
                 wait_for_key("Press any key to return...")
 
         elif choice == 1:

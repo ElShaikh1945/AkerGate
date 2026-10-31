@@ -35,8 +35,16 @@ def sync_telegram_serverless_config() -> Tuple[bool, str]:
     if not chat_id:
         return False, "No Telegram Allowed Chat ID configured."
 
-    target_file = TGCLOUD_DIR / "tgcloud" / "config.js"
+    target_file = TGCLOUD_DIR / "tgcloud" / "lib" / "config.js"
     target_file.parent.mkdir(parents=True, exist_ok=True)
+
+    # Clean up legacy root config.js if it exists to prevent stray file warning from @tgcloud/cli
+    legacy_file = TGCLOUD_DIR / "tgcloud" / "config.js"
+    if legacy_file.exists():
+        try:
+            legacy_file.unlink()
+        except OSError:
+            pass
 
     content = f"""/**
  * AkerGate Telegram Serverless Configuration
@@ -114,14 +122,24 @@ const EMBEDDED_INTERVAL_SECONDS = "{interval}";
     except Exception as e:
         return False, f"Failed to generate worker.bundle.js: {e}"
 
-def run_tgcloud_push() -> Tuple[bool, str]:
+def run_tgcloud_push(cli_token: Optional[str] = None) -> Tuple[bool, str]:
     """
     Executes 'npx @tgcloud/cli push' in the telegram_serverless directory.
+    Uses TGCLOUD_TOKEN if supplied or saved in config for automated non-interactive deployment.
     Returns (success, stdout/stderr output).
     """
     sync_ok, sync_msg = sync_telegram_serverless_config()
     if not sync_ok:
         return False, sync_msg
+
+    env = os.environ.copy()
+    if cli_token:
+        env["TGCLOUD_TOKEN"] = cli_token.strip()
+    else:
+        cfg = load_config()
+        stored_token = cfg.get("telegram", {}).get("tgcloud_token")
+        if stored_token:
+            env["TGCLOUD_TOKEN"] = stored_token.strip()
 
     try:
         proc = subprocess.run(
@@ -129,6 +147,7 @@ def run_tgcloud_push() -> Tuple[bool, str]:
             cwd=str(TGCLOUD_DIR),
             capture_output=True,
             text=True,
+            env=env,
             timeout=60
         )
         output = (proc.stdout + "\n" + proc.stderr).strip()

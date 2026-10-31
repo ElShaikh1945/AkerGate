@@ -8,7 +8,7 @@
  */
 
 import { api } from 'sdk';
-import { CONFIG } from '../config.js';
+import { CONFIG } from '../lib/config.js';
 
 // Decode Base32 string to Uint8Array
 function base32Decode(input) {

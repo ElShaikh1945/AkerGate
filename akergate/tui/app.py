@@ -66,38 +66,20 @@ def clear_screen():
     sys.stdout.write("\033[H\033[J")
     sys.stdout.flush()
 
-def print_header(active_tab: str = "Dashboard", highlighted_tab_idx: Optional[int] = None):
-    tabs = [
-        ("1", t("tabs.dashboard")),
-        ("2", t("tabs.services")),
-        ("3", t("tabs.totp")),
-        ("4", t("tabs.telegram")),
-        ("5", t("tabs.sentry")),
-        ("6", t("tabs.logs")),
-        ("7", t("tabs.lockdown")),
-        ("0", t("tabs.banner")),
-        ("L", f"Lang: {get_current_language().upper()}"),
-        ("Q", t("tabs.quit"))
-    ]
-    
-    header_text = Text()
-    header_text.append(f"{t('app.name').upper()} [v{APP_VERSION}] ", style="bold cyan")
-    header_text.append(f"| {t('app.credits')}\n\n", style="dim")
-    
-    for idx, (key, name) in enumerate(tabs):
-        is_highlighted = (highlighted_tab_idx is not None and idx == highlighted_tab_idx)
-        is_active = (name.lower() == active_tab.lower() or (active_tab == "Dashboard" and key == "1"))
-        
-        if is_highlighted:
-            header_text.append(f" > [{key}] {name} < ", style="bold #0B0E14 on #E5C07B")
-        elif is_active:
-            header_text.append(f" [{key}] {name} ", style="bold white on blue")
-        else:
-            header_text.append(f" [{key}] {name} ", style="dim")
-        header_text.append(" ")
-        
-    instructions = "[dim]Navigate: [bold #56B6C2]UP / DOWN / LEFT / RIGHT Arrows[/bold #56B6C2]  |  Select: [bold #56B6C2]ENTER / SPACE[/bold #56B6C2][/dim]"
-    console.print(Panel(header_text, subtitle=instructions, border_style="blue", padding=(0, 1)))
+def print_header(title: str = "Dashboard", highlighted_tab_idx: Optional[int] = None):
+    """
+    Renders top visual presentation:
+    - On Dashboard: Clean two-tone Slant typography banner
+    - On Submenus: Clean, single-line breadcrumb navigation bar
+    """
+    if title == "Dashboard":
+        console.print(get_rich_banner())
+    else:
+        nav_text = Text()
+        nav_text.append(f"AKERGATE [v{APP_VERSION}]", style="bold #56B6C2")
+        nav_text.append("  >  ", style="dim")
+        nav_text.append(title.upper(), style="bold #E5C07B")
+        console.print(Panel(nav_text, border_style="cyan", padding=(0, 1)))
 
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 1: DASHBOARD
@@ -669,101 +651,123 @@ def render_banner_screen():
     wait_for_key("Press any arrow key, Enter, or Space to return to Dashboard...")
 
 # ─────────────────────────────────────────────────────────────────────────────
+# SUBMENU: MULTI-FACTOR AUTHENTICATION
+# ─────────────────────────────────────────────────────────────────────────────
+def render_mfa_menu():
+    """Submenu for Multi-Factor Authentication: TOTP Credentials & Telegram OTP."""
+    while True:
+        def draw_mfa_header():
+            print_header("Multi-Factor Authentication")
+            secret = get_totp_secret()
+            tg_configured = bool(get_telegram_secret())
+            config = load_config()
+            tg_cfg = config.get("telegram", {})
+
+            table = Table(box=None, expand=True, padding=(0, 1))
+            table.add_column("Factor", style="bold cyan", width=22)
+            table.add_column("Status", style="bold", width=16)
+            table.add_column("Details")
+
+            totp_st = "[bold green]CONFIGURED[/bold green]" if secret else "[bold yellow]NOT CONFIGURED[/bold yellow]"
+            totp_dt = f"Current Host TOTP: [bold green]{compute_totp(secret)}[/bold green]" if secret else "Scan QR code or generate secret"
+            table.add_row("RFC 6238 TOTP", totp_st, totp_dt)
+
+            tg_st = "[bold green]CONFIGURED[/bold green]" if tg_configured else "[bold yellow]NOT CONFIGURED[/bold yellow]"
+            tg_dt = f"Chat ID: {tg_cfg.get('allowed_chat_id', 'unset')} | Backend: {tg_cfg.get('backend', 'cloudflare')}"
+            table.add_row("Telegram Windowed OTP", tg_st, tg_dt)
+
+            console.print(Panel(table, title="[bold]Authentication Factors[/bold]", border_style="cyan"))
+
+        mfa_options = [
+            ("Manage TOTP & Scan QR Code", "View phone QR code, Base32 secret, and test synchronization"),
+            ("Telegram Bot & Offline OTP Settings", "Manage bot token, chat ID, backend, and verify 7-digit OTP"),
+            ("Return to Dashboard", "Go back to main status dashboard")
+        ]
+
+        choice_idx = select_menu(
+            mfa_options,
+            default_index=0,
+            title="Multi-Factor Authentication Options (Arrow Keys)",
+            on_render_header=draw_mfa_header
+        )
+
+        if choice_idx == 0:
+            render_totp_setup()
+        elif choice_idx == 1:
+            render_telegram_setup()
+        elif choice_idx == 2 or choice_idx == len(mfa_options) - 1:
+            break
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SUBMENU: SECURITY CENTER & AUDITING
+# ─────────────────────────────────────────────────────────────────────────────
+def render_security_center_menu():
+    """Submenu for Security Operations, Auditing, Lockdown, and System Info."""
+    while True:
+        def draw_sec_header():
+            print_header("Security Center & Auditing")
+
+        sec_options = [
+            ("View Authentication Audit Logs", "Read authentication history, timestamps, and service results"),
+            ("Sentry Alerts & Event Monitor", "Configure Telegram alerts for logins, failed attempts, and queue"),
+            ("Emergency Quarantine & Lockdown", "Trigger, customize, or disarm host lockdown policies"),
+            ("View Official Logo Banner", "Display two-tone typography banner and license details"),
+            ("Return to Dashboard", "Go back to main status dashboard")
+        ]
+
+        choice_idx = select_menu(
+            sec_options,
+            default_index=0,
+            title="Security Center & Monitoring Options (Arrow Keys)",
+            on_render_header=draw_sec_header
+        )
+
+        if choice_idx == 0:
+            render_audit_logs()
+        elif choice_idx == 1:
+            render_sentry_setup()
+        elif choice_idx == 2:
+            render_lockdown()
+        elif choice_idx == 3:
+            render_banner_screen()
+        elif choice_idx == 4 or choice_idx == len(sec_options) - 1:
+            break
+
+# ─────────────────────────────────────────────────────────────────────────────
 # MAIN TUI LOOP (Fully Keyboard-Driven with Arrow Keys)
 # ─────────────────────────────────────────────────────────────────────────────
 def main_tui():
-    tabs_keys = ["1", "2", "3", "4", "5", "6", "7", "0", "L", "Q"]
-    tab_names = ["Dashboard", "Services", "TOTP / QR", "Telegram", "Sentry", "Audit Logs", "Lockdown", "Banner", "Lang", "Quit"]
-    
-    current_tab_idx = 0
-    
     # Enter terminal alternate screen buffer (clean dedicated canvas)
     sys.stdout.write("\033[?1049h\033[H")
     sys.stdout.flush()
     try:
         while True:
-            clear_screen()
-            active_tab = tab_names[current_tab_idx]
-            
-            if active_tab == "Dashboard":
-                def draw_dash():
-                    print_header(active_tab="Dashboard", highlighted_tab_idx=current_tab_idx)
-                    render_dashboard()
+            def draw_dash():
+                print_header("Dashboard")
+                render_dashboard()
 
-                dash_options = [
-                    ("Configure Protected Services", "Manage PAM rules for sudo, login, screensaver, sshd"),
-                    ("Manage TOTP & Scan QR Code", "View current credentials or re-scan terminal QR"),
-                    ("Telegram Bot Offline Settings", "Manage bot token, chat ID, and 7-digit OTP tests"),
-                    ("Sentry Event Monitor", "Configure brute-force lockdown and alert notifications"),
-                    ("View Authentication Audit Logs", "Read authentication history and timestamps"),
-                    ("Emergency Quarantine & Lockdown", "Trigger or disarm lockdown policies"),
-                    ("View AkerGate Logo Banner", "Display official two-tone typography banner"),
-                    (f"Switch Language ({'العربية' if get_current_language() == 'en' else 'English'})", "Toggle interface language instantly"),
-                    ("Quit AkerGate Console", "Close interactive terminal user interface")
-                ]
+            dash_options = [
+                ("Multi-Factor Authentication", "Configure TOTP QR credentials, code verification, and Telegram OTP"),
+                ("Protected Services & PAM", "Manage PAM rules for sudo, login, screensaver, sshd"),
+                ("Security Center & Auditing", "View audit logs, sentry event monitor, emergency lockdown, and info"),
+                ("Quit AkerGate Console", "Close interactive terminal user interface")
+            ]
 
-                choice_idx = select_menu(
-                    dash_options,
-                    default_index=0,
-                    title="Dashboard Navigation & Actions (Use UP / DOWN Arrows + ENTER)",
-                    on_render_header=draw_dash,
-                    allow_cancel=False
-                )
+            choice_idx = select_menu(
+                dash_options,
+                default_index=0,
+                title="AkerGate Main Navigation (Arrow Keys)",
+                on_render_header=draw_dash,
+                allow_cancel=False
+            )
 
-                if choice_idx == 0:
-                    current_tab_idx = 1
-                elif choice_idx == 1:
-                    current_tab_idx = 2
-                elif choice_idx == 2:
-                    current_tab_idx = 3
-                elif choice_idx == 3:
-                    current_tab_idx = 4
-                elif choice_idx == 4:
-                    current_tab_idx = 5
-                elif choice_idx == 5:
-                    current_tab_idx = 6
-                elif choice_idx == 6:
-                    current_tab_idx = 7
-                elif choice_idx == 7:
-                    curr = get_current_language()
-                    set_language("ar" if curr == "en" else "en")
-                elif choice_idx == 8 or choice_idx == len(dash_options) - 1:
-                    break
-                    
-            elif active_tab == "Services":
+            if choice_idx == 0:
+                render_mfa_menu()
+            elif choice_idx == 1:
                 render_services()
-                current_tab_idx = 0
-                
-            elif active_tab == "TOTP / QR":
-                render_totp_setup()
-                current_tab_idx = 0
-                
-            elif active_tab == "Telegram":
-                render_telegram_setup()
-                current_tab_idx = 0
-                
-            elif active_tab == "Sentry":
-                render_sentry_setup()
-                current_tab_idx = 0
-                
-            elif active_tab == "Audit Logs":
-                render_audit_logs()
-                current_tab_idx = 0
-                
-            elif active_tab == "Lockdown":
-                render_lockdown()
-                current_tab_idx = 0
-                
-            elif active_tab == "Banner":
-                render_banner_screen()
-                current_tab_idx = 0
-                
-            elif active_tab == "Lang":
-                curr = get_current_language()
-                set_language("ar" if curr == "en" else "en")
-                current_tab_idx = 0
-                
-            elif active_tab == "Quit":
+            elif choice_idx == 2:
+                render_security_center_menu()
+            elif choice_idx == 3 or choice_idx == len(dash_options) - 1:
                 break
     finally:
         # Restore normal terminal screen buffer and ensure cursor is visible

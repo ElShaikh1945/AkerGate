@@ -114,7 +114,7 @@ def render_dashboard():
     srv_text = Text()
     srv_text.append("Protected Entry Points:\n", style="bold")
     for srv, enabled in services.items():
-        symbol = "[✓]" if enabled else "[✗]"
+        symbol = "[x]" if enabled else "[ ]"
         style = "green" if enabled else "dim red"
         srv_text.append(f"  {symbol} {srv:<14} ", style=style)
     console.print(Panel(srv_text, border_style="dim"))

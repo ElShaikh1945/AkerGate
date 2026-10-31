@@ -59,6 +59,11 @@ from akergate.core.serverless_deployer import (
     run_tgcloud_push,
     run_wrangler_deploy
 )
+from akergate.core.telegram_pair import (
+    validate_bot_token,
+    listen_for_incoming_user,
+    dispatch_pairing_otp
+)
 from akergate.i18n import t, get_current_language, set_language, list_available_languages
 
 _last_net_check_time = 0.0
@@ -452,6 +457,171 @@ def render_serverless_wizard():
             break
 
 # ─────────────────────────────────────────────────────────────────────────────
+# INTERACTIVE TELEGRAM AUTO-PAIRING WIZARD
+# ─────────────────────────────────────────────────────────────────────────────
+def render_telegram_pairing_wizard():
+    """
+    Interactive Auto-Pairing Wizard:
+    1. Prompts for Bot Token & validates with Telegram Bot API.
+    2. Listens for incoming message (/start) to auto-detect User ID.
+    3. Confirms user identity or permits switching accounts.
+    4. Dispatches a 6-digit confirmation OTP to Telegram to verify 2-way communication.
+    5. Locks pairing upon code verification.
+    """
+    config = load_config()
+    tg_cfg = config.get("telegram", {})
+    current_token = tg_cfg.get("bot_token", "")
+
+    print_header("Telegram Auto-Pairing Wizard")
+    console.print(Panel(
+        "This wizard automatically pairs your Linux Host with your Telegram account.\n"
+        "You do NOT need to look up your numeric Chat ID manually!\n"
+        "Just enter your Bot Token, send /start to your bot, and enter the verification code.",
+        title="[bold]Zero-Manual Setup Experience[/bold]",
+        border_style="cyan"
+    ))
+
+    # Step 1: Bot Token Entry & Verification
+    console.print("\n[bold cyan]Step 1: Bot Token[/bold cyan]")
+    bot_token = Prompt.ask("Enter Telegram Bot Token (from @BotFather)", default=current_token).strip()
+    if not bot_token:
+        console.print("[!] Bot Token cannot be empty.", style="bold red")
+        time.sleep(1.5)
+        return
+
+    console.print("\n[*] Validating token with Telegram Bot API...", style="cyan")
+    valid, bot_name, bot_info = validate_bot_token(bot_token)
+    if not valid:
+        console.print(f"[!] Token validation failed: {bot_name}", style="bold red")
+        wait_for_key("Press any key to return...")
+        return
+
+    bot_username = bot_info.get("username", "")
+    console.print(f"[+] Connected to Bot: [bold green]{bot_name}[/bold green]", style="bold green")
+
+    # Step 2: Auto-Discovery Listener
+    while True:
+        console.print("\n" + "=" * 60)
+        console.print(f"[bold cyan]Step 2: Auto-Discover Your Telegram Account[/bold cyan]")
+        console.print("=" * 60)
+        instructions = (
+            f"1. Open your Telegram app on phone or desktop.\n"
+            f"2. Search for: [bold green]@{bot_username}[/bold green] (or open t.me/{bot_username})\n"
+            f"3. Click [bold]START[/bold] or send any text message (e.g. 'hello').\n\n"
+            "[dim]AkerGate will automatically detect your incoming message...[/dim]"
+        )
+        console.print(Panel(instructions, title="[bold]Send Message to Your Bot[/bold]", border_style="green"))
+
+        detected_user = None
+
+        with console.status("[bold cyan]Listening for incoming message from your Telegram account (waiting up to 60s)...[/bold cyan]", spinner="dots"):
+            ok, user_data, msg = listen_for_incoming_user(bot_token, timeout_seconds=60)
+            if ok and user_data:
+                detected_user = user_data
+
+        if not detected_user:
+            console.print(f"\n[yellow][!] {msg}[/yellow]")
+            retry = Confirm.ask("Would you like to try listening again?")
+            if retry:
+                continue
+            else:
+                return
+
+        # Step 3: Confirmation of Detected Account
+        user_id = detected_user["user_id"]
+        fname = detected_user["first_name"]
+        uname = f"@{detected_user['username']}" if detected_user.get("username") else "No username"
+        received_text = detected_user.get("text", "")
+
+        user_table = Table(box=None, expand=True, padding=(0, 1))
+        user_table.add_column("Property", style="bold cyan", width=18)
+        user_table.add_column("Value", style="bold")
+        user_table.add_row("Full Name", fname)
+        user_table.add_row("Username", uname)
+        user_table.add_row("Detected User ID", f"[bold green]{user_id}[/bold green]")
+        user_table.add_row("Message Received", f"'{received_text}'")
+
+        console.print(Panel(user_table, title="[bold]Incoming Sender Detected[/bold]", border_style="green"))
+
+        pair_choices = [
+            ("Confirm and Pair with this Account", f"Authorize User ID {user_id} ({fname})"),
+            ("Wait for another message", "Send from a different Telegram account or number"),
+            ("Cancel Pairing Wizard", "Exit to Telegram menu")
+        ]
+        choice = select_menu(pair_choices, title="Account Confirmation")
+        if choice == 0:
+            # Step 4: Two-Way OTP Verification Challenge
+            console.print("\n" + "=" * 60)
+            console.print(f"[bold cyan]Step 3: Two-Way Security Handshake[/bold cyan]")
+            console.print("=" * 60)
+            console.print(f"[*] Dispatching one-time pairing verification code to Telegram ({fname})...", style="cyan")
+
+            otp_ok, sent_code, otp_msg = dispatch_pairing_otp(bot_token, user_id)
+            if not otp_ok:
+                console.print(f"[!] Failed to deliver OTP to Telegram: {otp_msg}", style="bold red")
+                wait_for_key("Press any key to return...")
+                return
+
+            console.print(Panel(
+                f"[bold green][+] VERIFICATION CODE DISPATCHED TO YOUR TELEGRAM![/bold green]\n"
+                f"Check your Telegram app for a message from [bold]@{bot_username}[/bold].\n"
+                "Enter the 6-digit confirmation code below to lock the pairing.",
+                border_style="green"
+            ))
+
+            for attempt in range(3):
+                input_code = Prompt.ask("\nEnter 6-digit Pairing Code received on Telegram").strip()
+                if input_code == sent_code:
+                    # Successfully verified!
+                    tg_cfg["bot_token"] = bot_token
+                    tg_cfg["allowed_chat_id"] = user_id
+                    config["telegram"] = tg_cfg
+                    save_config(config)
+
+                    # Auto-sync credentials across all backend templates
+                    sync_telegram_serverless_config()
+                    sync_cloudflare_worker_bundle()
+
+                    # Send final success confirmation to Telegram
+                    success_notice = (
+                        "*[+] AKERGATE PAIRING LOCKED SUCCESSFULLY*\n"
+                        "────────────────────────\n"
+                        f"• Host: `{socket.gethostname()}`\n"
+                        f"• Paired ID: `{user_id}`\n"
+                        f"• Time: `{time.strftime('%Y-%m-%d %H:%M:%S')}`\n"
+                        "• Status: Two-Way communication active and verified.\n"
+                        "────────────────────────"
+                    )
+                    send_telegram_alert(success_notice, config)
+
+                    console.print(Panel(
+                        f"[bold green]PAIRING VERIFIED & LOCKED SUCCESSFULLY![/bold green]\n\n"
+                        f"• Bot: [bold cyan]@{bot_username}[/bold cyan]\n"
+                        f"• Authorized User: [bold cyan]{fname} ({uname})[/bold cyan]\n"
+                        f"• Telegram User ID: [bold green]{user_id}[/bold green]\n\n"
+                        "Two-way cryptographic communication is verified and active.",
+                        title="[bold]Pairing Complete[/bold]",
+                        border_style="green"
+                    ))
+                    wait_for_key("Press any key to continue...")
+                    return
+                else:
+                    remaining_attempts = 2 - attempt
+                    if remaining_attempts > 0:
+                        console.print(f"[!] Incorrect code. {remaining_attempts} attempt(s) remaining.", style="bold red")
+                    else:
+                        console.print("[!] Verification failed. Pairing aborted.", style="bold red")
+                        wait_for_key("Press any key to return...")
+                        return
+
+        elif choice == 1:
+            console.print("\n[cyan]Listening for the next message... Send /start from the intended account.[/cyan]")
+            time.sleep(1)
+            continue
+        else:
+            return
+
+# ─────────────────────────────────────────────────────────────────────────────
 # TAB 4: TELEGRAM BOT SETUP
 # ─────────────────────────────────────────────────────────────────────────────
 def render_telegram_setup():
@@ -502,8 +672,9 @@ def render_telegram_setup():
             console.print(f"Sample Valid 7-Digit OTP for Current Window: [bold green]{sample_otp}[/bold green]")
 
         options = [
+            ("Interactive Auto-Pairing Wizard (Zero Manual Chat ID)", "Automatically discovers your User ID & verifies with OTP challenge"),
             ("Automated Serverless Setup Wizard", "1-Click automated deployer for Telegram Serverless & Cloudflare"),
-            ("Configure Bot Token & Chat ID", "Set Telegram Bot credentials for offline OTP generation"),
+            ("Manual Bot Token & Chat ID Entry", "Manually type or update credentials without auto-pairing"),
             ("Select Backend Mode", "Choose between Telegram Serverless (tgcloud), Cloudflare, or Standalone"),
             ("Register / Update Serverless Webhook URL", "Link Telegram directly to your deployed Serverless function"),
             ("Test 7-Digit Offline OTP", "Verify a 7-digit OTP against the RTC epoch window"),
@@ -518,7 +689,7 @@ def render_telegram_setup():
         )
 
         if choice_idx == 0:
-            render_serverless_wizard()
+            render_telegram_pairing_wizard()
             config = load_config()
             tg_cfg = config.get("telegram", {})
             bot_token = tg_cfg.get("bot_token", "")
@@ -527,6 +698,15 @@ def render_telegram_setup():
             webhook_url = tg_cfg.get("webhook_url", "")
 
         elif choice_idx == 1:
+            render_serverless_wizard()
+            config = load_config()
+            tg_cfg = config.get("telegram", {})
+            bot_token = tg_cfg.get("bot_token", "")
+            chat_id = tg_cfg.get("allowed_chat_id", 0)
+            backend = tg_cfg.get("backend", "serverless")
+            webhook_url = tg_cfg.get("webhook_url", "")
+
+        elif choice_idx == 2:
             bot_token = tg_cfg.get("bot_token", "")
             chat_id = tg_cfg.get("allowed_chat_id", 0)
             new_token = Prompt.ask("\nEnter Telegram Bot Token (from @BotFather)", default=bot_token)
@@ -540,10 +720,12 @@ def render_telegram_setup():
             tg_cfg["allowed_chat_id"] = new_id
             config["telegram"] = tg_cfg
             save_config(config)
+            sync_telegram_serverless_config()
+            sync_cloudflare_worker_bundle()
             console.print("[+] Telegram credentials updated.", style="green")
             time.sleep(1)
 
-        elif choice_idx == 2:
+        elif choice_idx == 3:
             def draw_backend_picker():
                 print_header("Choose Backend Mode")
 
@@ -575,10 +757,10 @@ def render_telegram_setup():
                 console.print("\n[+] Backend set to STANDALONE DAEMON.", style="bold green")
                 time.sleep(1)
 
-        elif choice_idx == 3:
+        elif choice_idx == 4:
             bot_token = tg_cfg.get("bot_token", "")
             if not bot_token:
-                console.print("\n[!] Please configure your Bot Token first (Option 2).", style="bold red")
+                console.print("\n[!] Please configure your Bot Token first.", style="bold red")
                 time.sleep(1.5)
                 continue
 
@@ -600,7 +782,7 @@ def render_telegram_setup():
                     console.print(f"[!] Failed to register webhook: {msg}", style="bold red")
                 time.sleep(2)
 
-        elif choice_idx == 4:
+        elif choice_idx == 5:
             test_code = Prompt.ask("\nEnter 7-digit Telegram OTP")
             valid, token_id = verify_windowed_otp(secret, test_code)
             if valid:
@@ -609,7 +791,7 @@ def render_telegram_setup():
                 console.print("[!] Invalid OTP or expired epoch window.", style="bold red")
             wait_for_key("Press any key to return...")
 
-        elif choice_idx == 5 or choice_idx == len(options) - 1:
+        elif choice_idx == 6 or choice_idx == len(options) - 1:
             break
 
 # ─────────────────────────────────────────────────────────────────────────────

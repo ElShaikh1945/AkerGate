@@ -1,6 +1,6 @@
 /**
  * AkerGate Telegram Serverless Configuration Template
- * Real credentials are auto-injected into config.js by AkerGate Deployment Wizard.
+ * Real credentials are auto-injected into tgcloud/lib/config.js by AkerGate Deployment Wizard.
  * Zero emojis, clean symbols only.
  */
 

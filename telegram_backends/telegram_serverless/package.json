@@ -1,0 +1,14 @@
+{
+  "name": "akergate-telegram-serverless",
+  "version": "0.1.0",
+  "description": "AkerGate Native Telegram Serverless Bot (Hosted directly on Telegram infrastructure via tgcloud)",
+  "type": "module",
+  "scripts": {
+    "login": "tgcloud login",
+    "push": "tgcloud push",
+    "status": "tgcloud status"
+  },
+  "devDependencies": {
+    "@tgcloud/cli": "^0.1.0"
+  }
+}

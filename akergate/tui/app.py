@@ -336,10 +336,22 @@ def render_telegram_setup():
             table.add_column("Setting", style="bold cyan", width=22)
             table.add_column("Value")
             
-            is_serverless = backend in ("serverless", "cloudflare")
-            backend_label = "[bold green]SERVERLESS WEBHOOK (Cloudflare / Vercel)[/bold green]" if is_serverless else "[bold blue]STANDALONE DAEMON (Local / VPS)[/bold blue]"
-            table.add_row("Backend Mode", backend_label)
-            table.add_row("Webhook URL", f"[dim]{webhook_url}[/dim]" if webhook_url else "[dim]Not registered (set below)[/dim]")
+            if backend == "telegram_serverless":
+                backend_label = "[bold green]TELEGRAM SERVERLESS (Official tgcloud.ai)[/bold green]"
+                deploy_info = "telegram_backends/telegram_serverless  (npx tgcloud push)"
+            elif backend in ("cloudflare", "serverless"):
+                backend_label = "[bold green]EXTERNAL SERVERLESS (Cloudflare / Vercel)[/bold green]"
+                deploy_info = "telegram_backends/cloudflare_worker or serverless_python"
+            else:
+                backend_label = "[bold blue]STANDALONE DAEMON (Local / VPS)[/bold blue]"
+                deploy_info = "telegram_backends/standalone_bot/bot.py"
+
+            table.add_row("Backend Architecture", backend_label)
+            table.add_row("Deployment Target", deploy_info)
+            if backend in ("cloudflare", "serverless"):
+                table.add_row("Webhook URL", f"[dim]{webhook_url}[/dim]" if webhook_url else "[dim]Not registered (set via Option 3)[/dim]")
+            elif backend == "telegram_serverless":
+                table.add_row("Official Docs", "https://core.telegram.org/bots/serverless")
             table.add_row("Bot Token", f"{bot_token[:8]}..." if bot_token else "[yellow]UNSET[/yellow]")
             table.add_row("Allowed Chat ID", str(chat_id) if chat_id else "[yellow]UNSET[/yellow]")
             table.add_row("Shared Secret", f"[cyan]{secret}[/cyan]")
@@ -350,7 +362,7 @@ def render_telegram_setup():
             console.print(f"Sample Valid 7-Digit OTP for Current Window: [bold green]{sample_otp}[/bold green]")
 
         options = [
-            ("Select Backend Mode", "Switch between Serverless Webhook (Cloudflare/Vercel) and Standalone Bot"),
+            ("Select Backend Mode", "Choose between Telegram Serverless (tgcloud), Cloudflare, or Standalone"),
             ("Configure Bot Token & Chat ID", "Set Telegram Bot credentials for offline OTP generation"),
             ("Register / Update Serverless Webhook URL", "Link Telegram directly to your deployed Serverless function"),
             ("Test 7-Digit Offline OTP", "Verify a 7-digit OTP against the RTC epoch window"),
@@ -369,18 +381,25 @@ def render_telegram_setup():
                 print_header("Choose Backend Mode")
 
             picker_options = [
-                ("Serverless Webhook (Cloudflare Workers / Vercel)", "Zero maintenance, free edge function, instant response"),
-                ("Standalone Python Bot (Long-Polling Daemon)", "Runs on private machine, VPS, or background service"),
+                ("Official Telegram Serverless (tgcloud.ai)", "Zero external accounts. Runs natively in Telegram V8 isolates via @BotFather"),
+                ("External Serverless Webhook (Cloudflare / Vercel)", "Zero maintenance, free external edge functions"),
+                ("Standalone Python Bot (Long-Polling Daemon)", "Runs continuously on private machine or VPS"),
                 ("Cancel / Keep Current", "Return without changes")
             ]
             picked = select_menu(picker_options, title="Select Backend Architecture", on_render_header=draw_backend_picker)
             if picked == 0:
+                tg_cfg["backend"] = "telegram_serverless"
+                config["telegram"] = tg_cfg
+                save_config(config)
+                console.print("\n[+] Backend set to OFFICIAL TELEGRAM SERVERLESS (tgcloud.ai).", style="bold green")
+                time.sleep(1)
+            elif picked == 1:
                 tg_cfg["backend"] = "serverless"
                 config["telegram"] = tg_cfg
                 save_config(config)
-                console.print("\n[+] Backend set to SERVERLESS WEBHOOK.", style="bold green")
+                console.print("\n[+] Backend set to EXTERNAL SERVERLESS (Cloudflare/Vercel).", style="bold green")
                 time.sleep(1)
-            elif picked == 1:
+            elif picked == 2:
                 tg_cfg["backend"] = "standalone"
                 config["telegram"] = tg_cfg
                 save_config(config)

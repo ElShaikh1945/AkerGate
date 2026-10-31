@@ -1,0 +1,6 @@
+{
+  // AkerGate Native Telegram Serverless Configuration (tgcloud)
+  // Official Telegram Serverless: https://core.telegram.org/bots/serverless
+  "name": "akergate-otp-bot",
+  "version": "0.1.0"
+}

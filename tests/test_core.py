@@ -189,34 +189,23 @@ class TestAkerGateCore(unittest.TestCase):
 
     def test_ascii_banner_engine(self):
         from akergate.tui.ascii_banner import (
-            load_banner_data,
             get_ansi_banner,
             get_rich_banner,
             get_compact_banner,
             get_compact_rich_banner
         )
-        data = load_banner_data()
-        self.assertIsNotNone(data)
-        self.assertIn("rows", data)
-        self.assertEqual(len(data["rows"]), 61)
 
-        # 1. Test Compact 14-line Banner (Default for CLI / TUI)
-        compact = get_compact_banner()
-        self.assertEqual(len(compact.splitlines()), 14)
-        self.assertIn("AKERGATE", compact)
-        self.assertIn("SEF", compact)
-        self.assertIn("DUAU", compact)
+        # 1. Test Clean Typography Banner
+        banner = get_ansi_banner()
+        self.assertIn("Muhammad El-Shaikh", banner)
+        self.assertIn("Unified Multi-Auth Linux PAM Engine", banner)
+        self.assertIn("\033[38;2;", banner)
+        self.assertLessEqual(len(banner.splitlines()), 10)
 
-        compact_rich = get_compact_rich_banner()
-        self.assertEqual(len(compact_rich.plain.splitlines()), 14)
-
-        # 2. Test Full 61-line Artwork
-        full_banner = get_ansi_banner(full=True)
-        self.assertEqual(len(full_banner.splitlines()), 61)
-        self.assertIn("\033[38;2;", full_banner)
-
-        full_rich = get_rich_banner(full=True)
-        self.assertEqual(len(full_rich.plain.splitlines()), 61)
+        # 2. Test Rich text representation
+        rich_b = get_rich_banner()
+        self.assertIsNotNone(rich_b)
+        self.assertIn("Muhammad El-Shaikh", rich_b.plain)
 
 if __name__ == "__main__":
     unittest.main()

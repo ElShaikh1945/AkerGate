@@ -46,7 +46,13 @@ from akergate.pam.rollback import run_failsafe_test
 from akergate.tui.qr_render import generate_terminal_qr
 from akergate.tui.keyboard import get_key, select_menu, wait_for_key, console
 from akergate.tui.ascii_banner import get_rich_banner
-from akergate.sentry.notifier import send_telegram_alert, is_network_available
+from akergate.sentry.notifier import (
+    send_telegram_alert,
+    is_network_available,
+    set_telegram_webhook,
+    get_telegram_webhook_info,
+    delete_telegram_webhook
+)
 from akergate.i18n import t, get_current_language, set_language, list_available_languages
 
 _last_net_check_time = 0.0
@@ -318,16 +324,22 @@ def render_telegram_setup():
         set_telegram_secret(secret)
 
     while True:
+        bot_token = tg_cfg.get("bot_token", "")
+        chat_id = tg_cfg.get("allowed_chat_id", 0)
+        backend = tg_cfg.get("backend", "serverless")
+        webhook_url = tg_cfg.get("webhook_url", "")
+
         def draw_content():
-            print_header("Telegram", highlighted_tab_idx=3)
-            bot_token = tg_cfg.get("bot_token", "")
-            chat_id = tg_cfg.get("allowed_chat_id", 0)
-            backend = tg_cfg.get("backend", "cloudflare")
+            print_header("Telegram Offline OTP")
             
             table = Table(title="Telegram Offline OTP Configuration", expand=True)
-            table.add_column("Setting", style="bold cyan")
+            table.add_column("Setting", style="bold cyan", width=22)
             table.add_column("Value")
-            table.add_row("Backend Mode", f"[bold]{backend.upper()}[/bold] (cloudflare / standalone)")
+            
+            is_serverless = backend in ("serverless", "cloudflare")
+            backend_label = "[bold green]SERVERLESS WEBHOOK (Cloudflare / Vercel)[/bold green]" if is_serverless else "[bold blue]STANDALONE DAEMON (Local / VPS)[/bold blue]"
+            table.add_row("Backend Mode", backend_label)
+            table.add_row("Webhook URL", f"[dim]{webhook_url}[/dim]" if webhook_url else "[dim]Not registered (set below)[/dim]")
             table.add_row("Bot Token", f"{bot_token[:8]}..." if bot_token else "[yellow]UNSET[/yellow]")
             table.add_row("Allowed Chat ID", str(chat_id) if chat_id else "[yellow]UNSET[/yellow]")
             table.add_row("Shared Secret", f"[cyan]{secret}[/cyan]")
@@ -338,10 +350,11 @@ def render_telegram_setup():
             console.print(f"Sample Valid 7-Digit OTP for Current Window: [bold green]{sample_otp}[/bold green]")
 
         options = [
+            ("Select Backend Mode", "Switch between Serverless Webhook (Cloudflare/Vercel) and Standalone Bot"),
             ("Configure Bot Token & Chat ID", "Set Telegram Bot credentials for offline OTP generation"),
-            ("Switch Backend Mode", f"Toggle between Cloudflare Worker and Standalone Python Bot"),
+            ("Register / Update Serverless Webhook URL", "Link Telegram directly to your deployed Serverless function"),
             ("Test 7-Digit Offline OTP", "Verify a 7-digit OTP against the RTC epoch window"),
-            ("Return to Dashboard", "Go back to main status dashboard")
+            ("Return to Previous Menu", "Go back to Multi-Factor Authentication menu")
         ]
 
         choice_idx = select_menu(
@@ -352,6 +365,31 @@ def render_telegram_setup():
         )
 
         if choice_idx == 0:
+            def draw_backend_picker():
+                print_header("Choose Backend Mode")
+
+            picker_options = [
+                ("Serverless Webhook (Cloudflare Workers / Vercel)", "Zero maintenance, free edge function, instant response"),
+                ("Standalone Python Bot (Long-Polling Daemon)", "Runs on private machine, VPS, or background service"),
+                ("Cancel / Keep Current", "Return without changes")
+            ]
+            picked = select_menu(picker_options, title="Select Backend Architecture", on_render_header=draw_backend_picker)
+            if picked == 0:
+                tg_cfg["backend"] = "serverless"
+                config["telegram"] = tg_cfg
+                save_config(config)
+                console.print("\n[+] Backend set to SERVERLESS WEBHOOK.", style="bold green")
+                time.sleep(1)
+            elif picked == 1:
+                tg_cfg["backend"] = "standalone"
+                config["telegram"] = tg_cfg
+                save_config(config)
+                if bot_token and webhook_url:
+                    delete_telegram_webhook(bot_token)
+                console.print("\n[+] Backend set to STANDALONE DAEMON.", style="bold green")
+                time.sleep(1)
+
+        elif choice_idx == 1:
             bot_token = tg_cfg.get("bot_token", "")
             chat_id = tg_cfg.get("allowed_chat_id", 0)
             new_token = Prompt.ask("\nEnter Telegram Bot Token (from @BotFather)", default=bot_token)
@@ -367,26 +405,42 @@ def render_telegram_setup():
             save_config(config)
             console.print("[+] Telegram credentials updated.", style="green")
             time.sleep(1)
-            
-        elif choice_idx == 1:
-            backend = tg_cfg.get("backend", "cloudflare")
-            new_backend = "standalone" if backend == "cloudflare" else "cloudflare"
-            tg_cfg["backend"] = new_backend
-            config["telegram"] = tg_cfg
-            save_config(config)
-            console.print(f"\n[+] Switched backend to {new_backend.upper()}", style="green")
-            time.sleep(1)
-            
+
         elif choice_idx == 2:
+            bot_token = tg_cfg.get("bot_token", "")
+            if not bot_token:
+                console.print("\n[!] Please configure your Bot Token first (Option 2).", style="bold red")
+                time.sleep(1.5)
+                continue
+
+            current_url = tg_cfg.get("webhook_url", "")
+            console.print("\nEnter your deployed Serverless Webhook URL:")
+            console.print("[dim]Example: https://akergate-otp.workers.dev or https://your-app.vercel.app/api/webhook[/dim]")
+            new_url = Prompt.ask("Webhook URL", default=current_url)
+
+            if new_url:
+                console.print("\n[*] Registering webhook with Telegram API...", style="cyan")
+                ok, msg = set_telegram_webhook(bot_token, new_url)
+                if ok:
+                    tg_cfg["webhook_url"] = new_url
+                    tg_cfg["backend"] = "serverless"
+                    config["telegram"] = tg_cfg
+                    save_config(config)
+                    console.print(f"[+] Webhook registered successfully! {msg}", style="bold green")
+                else:
+                    console.print(f"[!] Failed to register webhook: {msg}", style="bold red")
+                time.sleep(2)
+
+        elif choice_idx == 3:
             test_code = Prompt.ask("\nEnter 7-digit Telegram OTP")
             valid, token_id = verify_windowed_otp(secret, test_code)
             if valid:
                 console.print(f"[+] VALID OTP! Identified as: {token_id}", style="bold green")
             else:
                 console.print("[!] Invalid OTP or expired epoch window.", style="bold red")
-            wait_for_key("Press any arrow key or Enter to return...")
-            
-        elif choice_idx == 3 or choice_idx == len(options) - 1:
+            wait_for_key("Press any key to return...")
+
+        elif choice_idx == 4 or choice_idx == len(options) - 1:
             break
 
 # ─────────────────────────────────────────────────────────────────────────────

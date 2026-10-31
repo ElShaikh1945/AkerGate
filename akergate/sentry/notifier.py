@@ -88,3 +88,48 @@ def format_event_message(event: dict) -> str:
     ]
     
     return "\n".join(lines)
+
+def set_telegram_webhook(bot_token: str, webhook_url: str) -> tuple[bool, str]:
+    """Registers a serverless webhook URL with Telegram Bot API."""
+    if not bot_token or not webhook_url:
+        return False, "Missing bot token or webhook URL."
+    url = f"https://api.telegram.org/bot{bot_token}/setWebhook"
+    payload = {"url": webhook_url}
+    data = json.dumps(payload).encode("utf-8")
+    req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            res_data = json.loads(resp.read().decode("utf-8"))
+            if res_data.get("ok"):
+                return True, res_data.get("description", "Webhook registered successfully.")
+            return False, res_data.get("description", "Failed to register webhook.")
+    except Exception as e:
+        return False, str(e)
+
+def get_telegram_webhook_info(bot_token: str) -> dict:
+    """Fetches the current webhook registration status from Telegram."""
+    if not bot_token:
+        return {}
+    url = f"https://api.telegram.org/bot{bot_token}/getWebhookInfo"
+    try:
+        with urllib.request.urlopen(url, timeout=10) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            if data.get("ok"):
+                return data.get("result", {})
+    except Exception:
+        pass
+    return {}
+
+def delete_telegram_webhook(bot_token: str) -> tuple[bool, str]:
+    """Deletes the registered webhook to enable standalone long-polling mode."""
+    if not bot_token:
+        return False, "Missing bot token."
+    url = f"https://api.telegram.org/bot{bot_token}/deleteWebhook"
+    try:
+        with urllib.request.urlopen(url, timeout=10) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            if data.get("ok"):
+                return True, data.get("description", "Webhook removed.")
+            return False, data.get("description", "Failed to delete webhook.")
+    except Exception as e:
+        return False, str(e)

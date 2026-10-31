@@ -31,9 +31,8 @@
   <polygon points="90,200 135,220 125,242 85,222" fill="#2E3D52" stroke="#0A0E17" stroke-width="2" />
   <polygon points="90,200 125,206 85,222" fill="#56B6C2" />
 
-  <!-- Piercing Cyan Feline Eye -->
+  <!-- Piercing Cyan Feline Eye (Pure Geometric Low-Poly Facet) -->
   <polygon points="118,155 136,159 122,168" fill="#56B6C2" stroke="#0A0E17" stroke-width="1.5" />
-  <circle cx="125" cy="160" r="2.5" fill="#FFFFFF" />
 
   <!-- Mane Facets (Layered Angular Armor) -->
   <polygon points="205,154 250,128 250,195 215,210" fill="#1A2433" stroke="#0A0E17" stroke-width="2" />
@@ -61,9 +60,8 @@
   <polygon points="410,200 365,220 375,242 415,222" fill="#2E3D52" stroke="#0A0E17" stroke-width="2" />
   <polygon points="410,200 375,206 415,222" fill="#56B6C2" />
 
-  <!-- Piercing Cyan Feline Eye -->
+  <!-- Piercing Cyan Feline Eye (Pure Geometric Low-Poly Facet) -->
   <polygon points="382,155 364,159 378,168" fill="#56B6C2" stroke="#0A0E17" stroke-width="1.5" />
-  <circle cx="375" cy="160" r="2.5" fill="#FFFFFF" />
 
   <!-- Mane Facets (Layered Angular Armor) -->
   <polygon points="295,154 250,128 250,195 285,210" fill="#1A2433" stroke="#0A0E17" stroke-width="2" />
@@ -78,7 +76,7 @@
            fill="#0A0E17" stroke="#56B6C2" stroke-width="3" stroke-linejoin="round" />
   
   <!-- Cryptographic Keyhole -->
-  <circle cx="250,226" cy="226" r="14" fill="#E5C07B" />
+  <circle cx="250" cy="226" r="14" fill="#E5C07B" />
   <polygon points="244,233 256,233 260,262 240,262" fill="#E5C07B" />
   <circle cx="250" cy="226" r="6" fill="#0A0E17" />
 

@@ -397,12 +397,17 @@ def render_serverless_wizard():
             current_cli_tok = load_tgcloud_credentials()
             if not current_cli_tok:
                 console.print("\n[bold yellow][!] No Telegram Serverless session linked yet.[/bold yellow]")
-                console.print("Choose how you would like to authenticate:")
-                console.print("  [bold cyan][1] Paste CLI Access Token from @BotFather (Instant)[/bold cyan]")
-                console.print("  [bold cyan][2] Launch Official Interactive Login Prompt[/bold cyan]")
-                console.print("  [dim][0] Cancel[/dim]\n")
-                auth_init = Prompt.ask("Select option", choices=["0", "1", "2"], default="1")
-                if auth_init == "1":
+                auth_init_options = [
+                    ("Paste CLI Access Token from @BotFather", "Instant connection with app<id>:<secret> token"),
+                    ("Launch Official Interactive Login", "Runs official 'tgcloud login' in this terminal"),
+                    ("Cancel & Return to Wizard", "Do not authenticate now")
+                ]
+                init_choice = select_menu(
+                    auth_init_options,
+                    title="Telegram Serverless Authentication Required",
+                    border_style="yellow"
+                )
+                if init_choice == 0:
                     console.print("\n[dim]In @BotFather: /mybots -> your bot -> Serverless -> CLI Access -> Access token[/dim]")
                     token_in = Prompt.ask("Enter CLI Access Token (format: app<id>:<secret>)")
                     if token_in.strip():
@@ -416,7 +421,7 @@ def render_serverless_wizard():
                             continue
                     else:
                         continue
-                elif auth_init == "2":
+                elif init_choice == 1:
                     console.print("\n[*] Starting official tgcloud login...", style="cyan")
                     time.sleep(1)
                     ok_l, msg_l = run_tgcloud_interactive_login()
@@ -457,53 +462,67 @@ def render_serverless_wizard():
                 wait_for_key("Press any key to return...")
 
         elif choice == 1:
-            console.print("\n[bold cyan]Telegram Serverless Authentication Manager[/bold cyan]")
-            current_tok = load_tgcloud_credentials()
-            if current_tok:
-                app_id = current_tok.split(":", 1)[0]
-                console.print(f"[green]Current Status: Linked to {app_id}[/green]\n")
-            else:
-                console.print("[yellow]Current Status: No active login session found.[/yellow]\n")
+            while True:
+                current_tok = load_tgcloud_credentials()
+                app_info = current_tok.split(":", 1)[0] if current_tok else "NOT LINKED"
 
-            console.print("Choose authentication action:")
-            console.print("  [bold cyan][1] Paste CLI Access Token (Direct & Fast)[/bold cyan]")
-            console.print("      From @BotFather: /mybots -> Serverless -> CLI Access -> Access token")
-            console.print("  [bold cyan][2] Launch Official Interactive Login[/bold cyan]")
-            console.print("      Runs 'tgcloud login' directly in your terminal")
-            if current_tok:
-                console.print("  [bold red][3] Disconnect / Clear Saved Credentials[/bold red]")
-            console.print("  [dim][0] Cancel / Back[/dim]\n")
-
-            valid_choices = ["0", "1", "2"] + (["3"] if current_tok else [])
-            auth_sub = Prompt.ask("Select option", choices=valid_choices, default="1")
-            if auth_sub == "1":
-                console.print("\n[bold]Instructions:[/bold]")
-                console.print("1. Open Telegram and message [bold]@BotFather[/bold]")
-                console.print("2. Send /mybots -> select your bot -> [bold]Serverless[/bold] -> [bold]CLI Access[/bold]")
-                console.print("3. Click [bold]Access token[/bold] and copy the value.\n")
-                token_input = Prompt.ask("Paste CLI Access Token (format: app<id>:<secret>)")
-                if token_input.strip():
-                    ok_save, msg_save = save_tgcloud_credentials(token_input.strip())
-                    if ok_save:
-                        console.print(f"\n[+] {msg_save}", style="bold green")
+                def draw_auth_header():
+                    print_header("Telegram Serverless Authentication Manager")
+                    table = Table(box=None, expand=True, padding=(0, 1))
+                    table.add_column("Property", style="bold cyan", width=24)
+                    table.add_column("Status", style="bold")
+                    if current_tok:
+                        table.add_row("Connection Status", f"[green]LINKED ({app_info})[/green]")
+                        table.add_row("CLI Token", f"[cyan]{current_tok[:10]}...[/cyan]")
                     else:
-                        console.print(f"\n[!] {msg_save}", style="bold red")
-                    time.sleep(2)
-            elif auth_sub == "2":
-                console.print("\n[*] Launching official interactive login in terminal...", style="cyan")
-                console.print("[dim]AkerGate will temporarily yield terminal control to @tgcloud/cli.[/dim]\n")
-                time.sleep(1)
-                ok_log, msg_log = run_tgcloud_interactive_login()
-                if ok_log:
-                    console.print(f"\n[+] {msg_log}", style="bold green")
+                        table.add_row("Connection Status", "[yellow]NOT LINKED[/yellow]")
+                    console.print(Panel(table, title="[bold]Session Status[/bold]", border_style="cyan"))
+
+                auth_menu_items = [
+                    ("Paste CLI Access Token (Direct & Fast)", "Copy from @BotFather -> Serverless -> CLI Access -> Access token"),
+                    ("Launch Official Interactive Login", "Runs official 'npx @tgcloud/cli login' in terminal")
+                ]
+                if current_tok:
+                    auth_menu_items.append(("Disconnect / Clear Saved Credentials", "Remove stored session credentials"))
+                auth_menu_items.append(("Return to Serverless Wizard", "Go back to previous menu"))
+
+                sub_choice = select_menu(
+                    auth_menu_items,
+                    title="Choose Authentication Action",
+                    on_render_header=draw_auth_header
+                )
+
+                if sub_choice == 0:
+                    console.print("\n[bold]Instructions:[/bold]")
+                    console.print("1. Open Telegram and message [bold]@BotFather[/bold]")
+                    console.print("2. Send /mybots -> select your bot -> [bold]Serverless[/bold] -> [bold]CLI Access[/bold]")
+                    console.print("3. Click [bold]Access token[/bold] and copy the value.\n")
+                    token_input = Prompt.ask("Paste CLI Access Token (format: app<id>:<secret>)")
+                    if token_input.strip():
+                        ok_save, msg_save = save_tgcloud_credentials(token_input.strip())
+                        if ok_save:
+                            console.print(f"\n[+] {msg_save}", style="bold green")
+                        else:
+                            console.print(f"\n[!] {msg_save}", style="bold red")
+                        time.sleep(2)
+                elif sub_choice == 1:
+                    console.print("\n[*] Launching official interactive login in terminal...", style="cyan")
+                    console.print("[dim]AkerGate will temporarily yield terminal control to @tgcloud/cli.[/dim]\n")
+                    time.sleep(1)
+                    ok_log, msg_log = run_tgcloud_interactive_login()
+                    if ok_log:
+                        console.print(f"\n[+] {msg_log}", style="bold green")
+                    else:
+                        console.print(f"\n[!] {msg_log}", style="yellow")
+                    wait_for_key("Press any key to return...")
+                elif sub_choice == 2 and current_tok:
+                    if Confirm.ask("\nAre you sure you want to remove tgcloud credentials?"):
+                        delete_tgcloud_credentials()
+                        console.print("[+] Telegram Serverless session removed.", style="bold green")
+                        time.sleep(1.5)
                 else:
-                    console.print(f"\n[!] {msg_log}", style="yellow")
-                wait_for_key("Press any key to return...")
-            elif auth_sub == "3" and current_tok:
-                if Confirm.ask("\nAre you sure you want to remove tgcloud credentials?"):
-                    delete_tgcloud_credentials()
-                    console.print("[+] Telegram Serverless session removed.", style="bold green")
-                    time.sleep(1.5)
+                    # Return or cancel
+                    break
 
         elif choice == 2:
             console.print("\n[*] Generating pre-bundled Cloudflare Worker...", style="cyan")

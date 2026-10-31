@@ -1,7 +1,7 @@
 """
-AkerGate - Keyboard Navigation and Interactive Menu Engine
-Zero external dependencies (uses standard termios, tty, select).
-Supports arrow keys (UP, DOWN, LEFT, RIGHT), ENTER, ESC, TAB, and direct keys.
+AkerGate - Reliable Keyboard Navigation and Interactive Menu Engine
+Direct OS-level raw descriptor reader (eliminating Python TextIOWrapper buffering conflicts).
+Handles ANSI Arrow Keys (UP, DOWN, LEFT, RIGHT), ENTER, SPACE, ESC, and shortcuts seamlessly.
 Zero emojis, clean symbols only.
 """
 
@@ -17,66 +17,87 @@ from rich.panel import Panel
 
 console = Console()
 
+def _parse_raw_bytes(b: bytes) -> str:
+    """Parse raw bytes from terminal into logical key strings."""
+    if not b:
+        return ""
+    # Standard and application keypad cursor keys
+    if b in (b"\x1b[A", b"\x1bOA"):
+        return "UP"
+    elif b in (b"\x1b[B", b"\x1bOB"):
+        return "DOWN"
+    elif b in (b"\x1b[C", b"\x1bOC"):
+        return "RIGHT"
+    elif b in (b"\x1b[D", b"\x1bOD"):
+        return "LEFT"
+    elif b in (b"\x1b[H", b"\x1b[1~"):
+        return "HOME"
+    elif b in (b"\x1b[F", b"\x1b[4~"):
+        return "END"
+    elif b in (b"\r", b"\n"):
+        return "ENTER"
+    elif b == b" ":
+        return "SPACE"
+    elif b == b"\t":
+        return "TAB"
+    elif b in (b"\x7f", b"\x08"):
+        return "BACKSPACE"
+    elif b == b"\x1b":
+        return "ESC"
+    
+    # Check if multiple escape sequences got batched
+    if b.startswith(b"\x1b[") and len(b) >= 3:
+        code = b[2:3]
+        if code == b"A": return "UP"
+        elif code == b"B": return "DOWN"
+        elif code == b"C": return "RIGHT"
+        elif code == b"D": return "LEFT"
+
+    try:
+        return b.decode("utf-8")
+    except UnicodeDecodeError:
+        return ""
+
 def get_key(timeout: Optional[float] = None) -> str:
     """
-    Read a single keypress from standard input without requiring Enter.
-    Returns: 'UP', 'DOWN', 'LEFT', 'RIGHT', 'ENTER', 'ESC', 'TAB', 'BACKSPACE', 'SPACE',
-    or the single character string (e.g. '1', 'q', 'l', 'y', 'n').
+    Read a single keypress directly from OS file descriptor without user-space buffering.
+    Guarantees arrow key escape sequences (e.g. \\x1b[A) are read as atomic units.
     """
     fd = sys.stdin.fileno()
     if not os.isatty(fd):
-        # Fallback for pipes, tests, or non-interactive environments
-        rlist, _, _ = select.select([sys.stdin], [], [], 0)
+        # Non-interactive / pipe fallback
+        rlist, _, _ = select.select([fd], [], [], 0)
         if rlist:
-            ch = sys.stdin.read(1)
-            return ch if ch else "ENTER"
+            raw = os.read(fd, 32)
+            if not raw:
+                return "ENTER"
+            return _parse_raw_bytes(raw)
         return "ENTER"
 
     old_settings = termios.tcgetattr(fd)
     try:
-        tty.setcbreak(fd)
+        # Use setraw for unbuffered atomic escape sequences
+        tty.setraw(fd)
         if timeout is not None:
-            rlist, _, _ = select.select([sys.stdin], [], [], timeout)
+            rlist, _, _ = select.select([fd], [], [], timeout)
             if not rlist:
                 return ""
-        ch = sys.stdin.read(1)
-        if ch == "\x1b":
-            # Potential ANSI escape sequence
-            rlist, _, _ = select.select([sys.stdin], [], [], 0.05)
+
+        raw = os.read(fd, 32)
+        if not raw:
+            return ""
+
+        # If a lone ESC byte was read, give a tiny 50ms window to catch trailing sequence
+        if raw == b"\x1b":
+            rlist, _, _ = select.select([fd], [], [], 0.05)
             if rlist:
-                ch2 = sys.stdin.read(1)
-                if ch2 in ("[", "O"):
-                    rlist, _, _ = select.select([sys.stdin], [], [], 0.05)
-                    if rlist:
-                        ch3 = sys.stdin.read(1)
-                        if ch3 == "A":
-                            return "UP"
-                        elif ch3 == "B":
-                            return "DOWN"
-                        elif ch3 == "C":
-                            return "RIGHT"
-                        elif ch3 == "D":
-                            return "LEFT"
-                        elif ch3 == "H":
-                            return "HOME"
-                        elif ch3 == "F":
-                            return "END"
-                        return f"ESC_{ch2}_{ch3}"
-                return "ESC"
-            return "ESC"
-        elif ch in ("\r", "\n"):
-            return "ENTER"
-        elif ch == "\t":
-            return "TAB"
-        elif ch in ("\x7f", "\x08"):
-            return "BACKSPACE"
-        elif ch == " ":
-            return "SPACE"
-        return ch
+                raw += os.read(fd, 31)
+
+        return _parse_raw_bytes(raw)
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
-def wait_for_key(prompt_text: str = "Press any arrow key, Enter, or Space to return...") -> str:
+def wait_for_key(prompt_text: str = "Press any key to return...") -> str:
     """Display a return prompt and wait for a single keypress."""
     console.print(f"\n[dim]{prompt_text}[/dim]")
     return get_key()
@@ -86,12 +107,13 @@ def select_menu(
     default_index: int = 0,
     title: str = "Select Action",
     border_style: str = "cyan",
-    on_render_header: Optional[Callable[[], None]] = None
+    on_render_header: Optional[Callable[[], None]] = None,
+    allow_cancel: bool = True
 ) -> int:
     """
     Render an interactive menu navigable via UP / DOWN arrow keys.
     Pressing ENTER or SPACE selects the highlighted option.
-    Pressing ESC returns the last option (typically 'Back').
+    Pressing ESC returns the last option (if allow_cancel is True).
     Direct digit keys (1-9) or shortcut letters will also jump/select.
 
     Each option is a tuple: (Label, Description)
@@ -134,7 +156,12 @@ def select_menu(
 
             table.add_row(pointer, num_str, label_str, desc_str)
 
-        instructions = "[dim]Navigate: [bold #56B6C2]UP / DOWN Arrows[/bold #56B6C2]  |  Select: [bold #56B6C2]ENTER / SPACE[/bold #56B6C2]  |  Back: [bold #56B6C2]ESC / B[/bold #56B6C2][/dim]"
+        instructions = "[dim]Navigate: [bold #56B6C2]UP / DOWN Arrows[/bold #56B6C2]  |  Select: [bold #56B6C2]ENTER / SPACE[/bold #56B6C2]"
+        if allow_cancel:
+            instructions += "  |  Back: [bold #56B6C2]ESC / B[/bold #56B6C2][/dim]"
+        else:
+            instructions += "  |  Quit: [bold #56B6C2]Q[/bold #56B6C2][/dim]"
+
         panel = Panel(
             table,
             title=f"[bold]{title}[/bold]",
@@ -153,9 +180,16 @@ def select_menu(
             current_idx = (current_idx + 1) % len(options)
         elif key in ("ENTER", "SPACE"):
             return current_idx
-        elif key in ("ESC", "b", "B", "q", "Q"):
-            # Return last option (assumed to be Back/Cancel)
-            return len(options) - 1
+        elif key in ("ESC", "b", "B"):
+            if allow_cancel:
+                return len(options) - 1
+            # If cancel is not allowed (e.g. Dashboard), do not exit!
+        elif key in ("q", "Q"):
+            if not allow_cancel:
+                # In Dashboard, pressing Q selects Quit
+                return len(options) - 1
+            else:
+                return len(options) - 1
         elif key.isdigit():
             # Check 1-based digit shortcut
             digit_val = int(key) - 1

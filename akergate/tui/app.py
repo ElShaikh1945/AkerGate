@@ -690,7 +690,8 @@ def main_tui():
                 dash_options,
                 default_index=0,
                 title="Dashboard Navigation & Actions (Use UP / DOWN Arrows + ENTER)",
-                on_render_header=draw_dash
+                on_render_header=draw_dash,
+                allow_cancel=False
             )
 
             if choice_idx == 0:

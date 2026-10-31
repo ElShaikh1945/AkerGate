@@ -1,58 +1,45 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
-  <defs>
-    <linearGradient id="portalGold" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#FFE082" />
-      <stop offset="100%" stop-color="#C59B27" />
-    </linearGradient>
-    <linearGradient id="portalBlue" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0052D4" />
-      <stop offset="50%" stop-color="#4364F7" />
-      <stop offset="100%" stop-color="#6FB1FC" />
-    </linearGradient>
-    <radialGradient id="portalGaze" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#192A56" />
-      <stop offset="100%" stop-color="#080C16" />
-    </radialGradient>
-  </defs>
+  <!-- 100% FLAT DESIGN - ZERO GRADIENTS -->
+  <!-- Concept: Winged Horizon Portal -->
+  <rect width="500" height="500" rx="20" fill="#0C121D" />
 
-  <rect width="500" height="500" fill="url(#portalGaze)" />
+  <!-- Outer Ring -->
+  <circle cx="250" cy="250" r="220" fill="none" stroke="#E5C07B" stroke-width="4" />
+  <circle cx="250" cy="250" r="210" fill="none" stroke="#25354D" stroke-width="2" stroke-dasharray="6 6" />
 
-  <!-- Outer Protective Halo Ring -->
-  <circle cx="250" cy="250" r="210" fill="none" stroke="url(#portalGold)" stroke-width="2" />
-  <circle cx="250" cy="250" r="202" fill="none" stroke="#6FB1FC" stroke-width="1" stroke-dasharray="2 8" />
+  <!-- The Winged Solar Bar (Behedeti Wings) in Solid Flat Layers -->
+  <!-- Left Wing Plumes -->
+  <path d="M 250,140 C 180,100 110,120 40,180 C 100,175 160,185 200,205 Z" fill="#E5C07B" />
+  <path d="M 230,165 C 180,145 130,160 70,210 C 120,205 170,210 205,225 Z" fill="#56B6C2" />
 
-  <!-- Winged Solar Gateway (Behedeti Wings) -->
-  <!-- Left Wing -->
-  <path d="M 250,140 C 180,100 110,120 50,180 C 100,175 160,185 200,205 Z" fill="url(#portalGold)" opacity="0.85" />
-  <path d="M 230,165 C 180,145 130,160 80,210 C 120,205 170,210 205,225 Z" fill="url(#portalGold)" opacity="0.65" />
-  <path d="M 215,190 C 180,175 140,190 100,235 C 135,230 175,232 205,245 Z" fill="url(#portalGold)" opacity="0.45" />
+  <!-- Right Wing Plumes -->
+  <path d="M 250,140 C 320,100 390,120 460,180 C 400,175 340,185 300,205 Z" fill="#E5C07B" />
+  <path d="M 270,165 C 320,145 370,160 430,210 C 380,205 330,210 295,225 Z" fill="#56B6C2" />
 
-  <!-- Right Wing (Mirrored) -->
-  <path d="M 250,140 C 320,100 390,120 450,180 C 400,175 340,185 300,205 Z" fill="url(#portalGold)" opacity="0.85" />
-  <path d="M 270,165 C 320,145 370,160 420,210 C 380,205 330,210 295,225 Z" fill="url(#portalGold)" opacity="0.65" />
-  <path d="M 285,190 C 320,175 360,190 400,235 C 365,230 325,232 295,245 Z" fill="url(#portalGold)" opacity="0.45" />
+  <!-- Left Lion Sentinel (Bold Flat Profile) -->
+  <g fill="#E5C07B" stroke="#0C121D" stroke-width="2">
+    <path d="M 195,230 C 175,215 155,220 135,235 C 120,245 115,260 125,275 C 115,285 120,305 135,315 L 195,315 Z" />
+    <polygon points="180,210 190,195 170,200" />
+    <circle cx="145" cy="250" r="4" fill="#0C121D" />
+  </g>
 
-  <!-- Twin Lion Head Outlines flanking the Portal -->
-  <!-- Left Lion Profile -->
-  <path d="M 180,220 C 160,205 140,210 120,225 C 110,235 105,250 115,265 C 105,275 110,295 125,305 L 180,310 Z" 
-        fill="#121A2A" stroke="url(#portalGold)" stroke-width="3" />
-  <circle cx="135" cy="245" r="4" fill="#6FB1FC" />
+  <!-- Right Lion Sentinel (Mirrored) -->
+  <g transform="translate(500, 0) scale(-1, 1)" fill="#E5C07B" stroke="#0C121D" stroke-width="2">
+    <path d="M 195,230 C 175,215 155,220 135,235 C 120,245 115,260 125,275 C 115,285 120,305 135,315 L 195,315 Z" />
+    <polygon points="180,210 190,195 170,200" />
+    <circle cx="145" cy="250" r="4" fill="#0C121D" />
+  </g>
 
-  <!-- Right Lion Profile -->
-  <path d="M 320,220 C 340,205 360,210 380,225 C 390,235 395,250 385,265 C 395,275 390,295 375,305 L 320,310 Z" 
-        fill="#121A2A" stroke="url(#portalGold)" stroke-width="3" />
-  <circle cx="365" cy="245" r="4" fill="#6FB1FC" />
+  <!-- Center Portal Sun Disc -->
+  <circle cx="250" cy="250" r="45" fill="#0C121D" stroke="#E5C07B" stroke-width="6" />
+  <circle cx="250" cy="250" r="22" fill="#56B6C2" />
+  <!-- Center Keyhole Silhouette -->
+  <circle cx="250" cy="245" r="7" fill="#0C121D" />
+  <polygon points="246,248 254,248 256,262 244,262" fill="#0C121D" />
 
-  <!-- Center Portal Sun Disc with Rotating Crypto Blades -->
-  <circle cx="250" cy="250" r="55" fill="#080C16" stroke="url(#portalGold)" stroke-width="4" />
-  <circle cx="250" cy="250" r="45" fill="none" stroke="#4364F7" stroke-width="3" stroke-dasharray="10 6" />
-  <circle cx="250" cy="250" r="22" fill="url(#portalGold)" />
-  <circle cx="250" cy="250" r="10" fill="#080C16" />
-
-  <!-- Horizon Peak / Base Line -->
-  <path d="M 120,340 L 210,310 L 250,335 L 290,310 L 380,340" fill="none" stroke="url(#portalGold)" stroke-width="4" stroke-linecap="round" />
-  <line x1="80" y1="365" x2="420" y2="365" stroke="url(#portalGold)" stroke-width="2" />
-
-  <text x="250" y="415" font-family="'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="900" letter-spacing="8" fill="url(#portalGold)" text-anchor="middle">AKERGATE</text>
-  <text x="250" y="440" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="600" letter-spacing="5" fill="#6FB1FC" text-anchor="middle">THE HORIZON DEFENSE</text>
+  <!-- Ground Pedestal -->
+  <rect x="100" y="340" width="300" height="12" fill="#E5C07B" />
+  
+  <text x="250" y="410" font-family="'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="900" letter-spacing="8" fill="#E5C07B" text-anchor="middle">AKERGATE</text>
+  <text x="250" y="435" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="bold" letter-spacing="4" fill="#56B6C2" text-anchor="middle">HORIZON WINGED DEFENSE</text>
 </svg>

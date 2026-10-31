@@ -1,49 +1,57 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
-  <defs>
-    <linearGradient id="padlockGold" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FFEAA7" />
-      <stop offset="50%" stop-color="#E5C07B" />
-      <stop offset="100%" stop-color="#D4AF37" />
-    </linearGradient>
-    <linearGradient id="padlockCyan" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#56B6C2" />
-      <stop offset="100%" stop-color="#1E3799" />
-    </linearGradient>
-  </defs>
+  <!-- 100% FLAT DESIGN - ZERO GRADIENTS -->
+  <!-- Concept: The Grand Temple Pylon Gate of Aker -->
+  <!-- Deep Blue/Obsidian Base -->
+  <rect width="500" height="500" rx="20" fill="#090E17" />
 
-  <!-- Dark Background -->
-  <rect width="500" height="500" rx="30" fill="#0A0E14" />
+  <!-- Outer Architectural Border -->
+  <rect x="25" y="25" width="450" height="450" rx="10" fill="none" stroke="#E5C07B" stroke-width="4" />
+  <rect x="35" y="35" width="430" height="430" rx="6" fill="none" stroke="#253346" stroke-width="1.5" />
 
-  <!-- The Padlock Shackle / Solar Arc -->
-  <path d="M 180,210 L 180,140 C 180,95 210,65 250,65 C 290,65 320,95 320,140 L 320,210" 
-        fill="none" stroke="url(#padlockGold)" stroke-width="22" stroke-linecap="round" />
+  <!-- Left Egyptian Temple Pylon Tower (Trapezoidal Stone Citadel) -->
+  <polygon points="60,380 100,160 210,160 210,380" fill="#131B26" stroke="#E5C07B" stroke-width="4" />
+  <line x1="85" y1="200" x2="200" y2="200" stroke="#253346" stroke-width="2" />
+  <line x1="75" y1="260" x2="205" y2="260" stroke="#253346" stroke-width="2" />
+  <line x1="68" y1="320" x2="208" y2="320" stroke="#253346" stroke-width="2" />
 
-  <!-- Shackle Inner Glow / Accent -->
-  <path d="M 200,200 L 200,145 C 200,115 220,90 250,90 C 280,90 300,115 300,145 L 300,200" 
-        fill="none" stroke="#56B6C2" stroke-width="4" stroke-linecap="round" stroke-dasharray="8 6" />
+  <!-- Right Egyptian Temple Pylon Tower (Mirrored) -->
+  <polygon points="440,380 400,160 290,160 290,380" fill="#131B26" stroke="#E5C07B" stroke-width="4" />
+  <line x1="415" y1="200" x2="300" y2="200" stroke="#253346" stroke-width="2" />
+  <line x1="425" y1="260" x2="295" y2="260" stroke="#253346" stroke-width="2" />
+  <line x1="432" y1="320" x2="292" y2="320" stroke="#253346" stroke-width="2" />
 
-  <!-- Akhet Mountain Valley Body (The Lock Body styled as the Two Peaks of Aker) -->
-  <path d="M 70,390 L 130,220 C 145,180 185,180 200,220 L 250,300 L 300,220 C 315,180 355,180 370,220 L 430,390 C 440,420 415,440 380,440 L 120,440 C 85,440 60,420 70,390 Z"
-        fill="#161B22" stroke="url(#padlockGold)" stroke-width="6" stroke-linejoin="round" />
+  <!-- The Open Central Portal Arch -->
+  <rect x="210" y="210" width="80" height="170" fill="#090E17" stroke="#E5C07B" stroke-width="4" />
+  <!-- Portal Cavetto Cornice (Egyptian architectural molding) -->
+  <polygon points="195,210 305,210 295,190 205,190" fill="#E5C07B" />
+  <!-- Central Security Keyhole in Portal -->
+  <circle cx="250" cy="270" r="14" fill="#56B6C2" />
+  <polygon points="245,275 255,275 258,320 242,320" fill="#56B6C2" />
 
-  <!-- Left Lion Face Profile in Mountain Crest -->
-  <path d="M 140,240 C 120,250 110,270 115,290 C 120,310 135,325 155,330 L 210,330" fill="none" stroke="url(#padlockGold)" stroke-width="3" />
-  <circle cx="140" cy="275" r="5" fill="#56B6C2" />
+  <!-- LEFT MAJESTIC LION STATUE Atop Left Pylon (Looking West) -->
+  <g fill="#E5C07B" stroke="#090E17" stroke-width="1.5">
+    <!-- Lion Silhouette sitting vigilant -->
+    <path d="M 205,160 L 115,160 C 110,160 105,155 105,145 C 105,135 115,130 130,130 L 155,130 L 165,100 C 150,90 145,70 155,50 C 170,45 185,55 190,70 L 205,95 Z" />
+    <path d="M 155,50 C 140,55 125,65 110,75 C 95,85 85,95 90,105 C 100,110 115,105 125,100 L 135,115" />
+    <!-- Lion Ear -->
+    <polygon points="175,45 185,30 165,38" />
+    <!-- Eye -->
+    <polygon points="135,70 145,67 140,75" fill="#090E17" />
+    <!-- Nose -->
+    <polygon points="90,100 100,100 95,105" fill="#090E17" />
+  </g>
 
-  <!-- Right Lion Face Profile in Mountain Crest -->
-  <path d="M 360,240 C 380,250 390,270 385,290 C 380,310 365,325 345,330 L 290,330" fill="none" stroke="url(#padlockGold)" stroke-width="3" />
-  <circle cx="360" cy="275" r="5" fill="#56B6C2" />
+  <!-- RIGHT MAJESTIC LION STATUE Atop Right Pylon (Looking East - Mirrored) -->
+  <g transform="translate(500, 0) scale(-1, 1)" fill="#E5C07B" stroke="#090E17" stroke-width="1.5">
+    <path d="M 205,160 L 115,160 C 110,160 105,155 105,145 C 105,135 115,130 130,130 L 155,130 L 165,100 C 150,90 145,70 155,50 C 170,45 185,55 190,70 L 205,95 Z" />
+    <path d="M 155,50 C 140,55 125,65 110,75 C 95,85 85,95 90,105 C 100,110 115,105 125,100 L 135,115" />
+    <polygon points="175,45 185,30 165,38" />
+    <polygon points="135,70 145,67 140,75" fill="#090E17" />
+    <polygon points="90,100 100,100 95,105" fill="#090E17" />
+  </g>
 
-  <!-- Central Glowing Sun Disc (The Keyhole Core) -->
-  <circle cx="250" cy="235" r="42" fill="#0A0E14" stroke="url(#padlockGold)" stroke-width="5" />
-  <circle cx="250" cy="235" r="32" fill="url(#padlockGold)" />
-  <circle cx="250" cy="235" r="18" fill="#0A0E14" />
-
-  <!-- Modern Keyhole Cutout -->
-  <circle cx="250" cy="230" r="6" fill="#56B6C2" />
-  <polygon points="247,233 253,233 255,245 245,245" fill="#56B6C2" />
-
-  <!-- Horizon Base Inscription -->
-  <line x1="120" y1="410" x2="380" y2="410" stroke="url(#padlockGold)" stroke-width="3" />
-  <text x="250" y="432" font-family="'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="900" letter-spacing="8" fill="#56B6C2" text-anchor="middle">AKERGATE</text>
+  <!-- Ground Foundation Step -->
+  <rect x="40" y="380" width="420" height="20" fill="#E5C07B" />
+  <text x="250" y="440" font-family="'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="900" letter-spacing="8" fill="#E5C07B" text-anchor="middle">AKERGATE</text>
+  <text x="250" y="465" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="bold" letter-spacing="4" fill="#56B6C2" text-anchor="middle">THE CITADEL GATEWAY</text>
 </svg>

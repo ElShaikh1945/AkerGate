@@ -1,57 +1,47 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
-  <defs>
-    <linearGradient id="shieldGold" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FFDF78" />
-      <stop offset="60%" stop-color="#E5C07B" />
-      <stop offset="100%" stop-color="#A67C1E" />
-    </linearGradient>
-    <linearGradient id="shieldCyan" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#61AFEF" />
-      <stop offset="100%" stop-color="#008080" />
-    </linearGradient>
-    <radialGradient id="shieldDark" cx="50%" cy="40%" r="60%">
-      <stop offset="0%" stop-color="#1B222D" />
-      <stop offset="100%" stop-color="#0B0E14" />
-    </radialGradient>
-  </defs>
+  <!-- 100% FLAT DESIGN - ZERO GRADIENTS -->
+  <!-- Dark Background -->
+  <rect width="500" height="500" rx="20" fill="#0A0E17" />
 
-  <!-- Hexagonal Shield Outer Body -->
-  <polygon points="250,30 430,110 430,320 250,470 70,320 70,110" fill="url(#shieldDark)" stroke="url(#shieldGold)" stroke-width="5" stroke-linejoin="round" />
-  <polygon points="250,50 410,122 410,310 250,446 90,310 90,122" fill="none" stroke="#30363D" stroke-width="2" />
+  <!-- Shield Outer Border -->
+  <path d="M 250,30 L 430,90 L 430,270 C 430,370 340,440 250,470 C 160,440 70,370 70,270 L 70,90 Z" 
+        fill="#131B26" stroke="#E5C07B" stroke-width="6" stroke-linejoin="round" />
+  <path d="M 250,48 L 412,102 L 412,265 C 412,355 330,420 250,448 C 170,420 88,355 88,265 L 88,102 Z" 
+        fill="none" stroke="#253346" stroke-width="2" />
 
-  <!-- Geometric Lion Sentinel of Aker -->
-  <!-- Left Half -->
-  <path d="M 250,100 L 210,130 L 170,115 L 140,165 L 160,200 L 130,235 L 175,270 L 210,240 L 250,290" 
-        fill="none" stroke="url(#shieldGold)" stroke-width="4" stroke-linejoin="round" />
-  <polygon points="170,115 190,160 140,165" fill="#E5C07B" fill-opacity="0.15" stroke="url(#shieldGold)" stroke-width="2" />
-  <polygon points="190,160 250,100 210,130" fill="#E5C07B" fill-opacity="0.25" stroke="url(#shieldGold)" stroke-width="2" />
-  <polygon points="190,160 210,240 160,200" fill="#56B6C2" fill-opacity="0.2" stroke="url(#shieldCyan)" stroke-width="2" />
-  <polygon points="160,200 175,270 130,235" fill="#E5C07B" fill-opacity="0.1" stroke="url(#shieldGold)" stroke-width="2" />
+  <!-- Central Fortified Vault Door -->
+  <rect x="220" y="160" width="60" height="200" rx="4" fill="#0A0E17" stroke="#56B6C2" stroke-width="3" />
+  <circle cx="250" cy="230" r="14" fill="#E5C07B" />
+  <rect x="247" y="235" width="6" height="30" fill="#E5C07B" />
 
-  <!-- Right Half (Mirrored) -->
-  <path d="M 250,100 L 290,130 L 330,115 L 360,165 L 340,200 L 370,235 L 325,270 L 290,240 L 250,290" 
-        fill="none" stroke="url(#shieldGold)" stroke-width="4" stroke-linejoin="round" />
-  <polygon points="330,115 310,160 360,165" fill="#E5C07B" fill-opacity="0.15" stroke="url(#shieldGold)" stroke-width="2" />
-  <polygon points="310,160 250,100 290,130" fill="#E5C07B" fill-opacity="0.25" stroke="url(#shieldGold)" stroke-width="2" />
-  <polygon points="310,160 290,240 340,200" fill="#56B6C2" fill-opacity="0.2" stroke="url(#shieldCyan)" stroke-width="2" />
-  <polygon points="340,200 325,270 370,235" fill="#E5C07B" fill-opacity="0.1" stroke="url(#shieldGold)" stroke-width="2" />
+  <!-- LEFT ROARING LION HEAD (Looking West) -->
+  <g fill="#E5C07B" stroke="#0A0E17" stroke-width="1.5">
+    <!-- Mane Volume -->
+    <path d="M 220,170 C 190,160 170,140 160,110 C 145,125 140,150 145,175 C 130,165 120,185 125,210 C 110,210 105,235 115,255 C 105,265 110,285 130,300 C 140,310 160,315 180,310 L 220,310 Z" />
+    <!-- Lion Face / Snout / Open Jaw -->
+    <path d="M 175,130 C 150,130 130,145 115,165 C 100,180 80,185 65,200 C 60,205 60,215 70,220 C 85,225 100,215 110,215 C 100,230 105,245 120,250 C 135,255 150,245 160,230" />
+    <!-- Lion Ear -->
+    <polygon points="175,130 185,105 165,115" />
+    <!-- Eye -->
+    <polygon points="135,170 150,165 142,175" fill="#0A0E17" />
+    <circle cx="142" cy="170" r="2.5" fill="#56B6C2" />
+    <!-- Fangs / Teeth -->
+    <polygon points="85,218 92,228 97,218" fill="#FFFFFF" />
+    <polygon points="98,235 104,226 108,235" fill="#FFFFFF" />
+  </g>
 
-  <!-- Central Sentinel Eye / Cyber Core -->
-  <circle cx="250" cy="210" r="18" fill="url(#shieldDark)" stroke="url(#shieldCyan)" stroke-width="3" />
-  <circle cx="250" cy="210" r="8" fill="url(#shieldCyan)" />
-  <line x1="250" y1="130" x2="250" y2="190" stroke="url(#shieldCyan)" stroke-width="2.5" stroke-dasharray="4 4" />
+  <!-- RIGHT ROARING LION HEAD (Looking East - Mirrored) -->
+  <g transform="translate(500, 0) scale(-1, 1)" fill="#E5C07B" stroke="#0A0E17" stroke-width="1.5">
+    <path d="M 220,170 C 190,160 170,140 160,110 C 145,125 140,150 145,175 C 130,165 120,185 125,210 C 110,210 105,235 115,255 C 105,265 110,285 130,300 C 140,310 160,315 180,310 L 220,310 Z" />
+    <path d="M 175,130 C 150,130 130,145 115,165 C 100,180 80,185 65,200 C 60,205 60,215 70,220 C 85,225 100,215 110,215 C 100,230 105,245 120,250 C 135,255 150,245 160,230" />
+    <polygon points="175,130 185,105 165,115" />
+    <polygon points="135,170 150,165 142,175" fill="#0A0E17" />
+    <circle cx="142" cy="170" r="2.5" fill="#56B6C2" />
+    <polygon points="85,218 92,228 97,218" fill="#FFFFFF" />
+    <polygon points="98,235 104,226 108,235" fill="#FFFFFF" />
+  </g>
 
-  <!-- Dual Horizon Gateway Pedestal (Aker Mountains) -->
-  <path d="M 180,350 L 215,310 L 250,335 L 285,310 L 320,350" fill="none" stroke="url(#shieldGold)" stroke-width="3.5" stroke-linecap="round" />
-  
-  <!-- Circuit Nodes connecting to Gateway bottom -->
-  <line x1="250" y1="335" x2="250" y2="400" stroke="url(#shieldCyan)" stroke-width="3" />
-  <circle cx="250" cy="400" r="6" fill="url(#shieldCyan)" />
-  <line x1="215" y1="350" x2="190" y2="385" stroke="url(#shieldGold)" stroke-width="2" />
-  <circle cx="190" cy="385" r="4" fill="url(#shieldGold)" />
-  <line x1="285" y1="350" x2="310" y2="385" stroke="url(#shieldGold)" stroke-width="2" />
-  <circle cx="310" cy="385" r="4" fill="url(#shieldGold)" />
-
-  <!-- Monogram Label -->
-  <text x="250" y="440" font-family="'Segoe UI', Roboto, sans-serif" font-size="18" font-weight="900" letter-spacing="6" fill="url(#shieldGold)" text-anchor="middle">AKERGATE</text>
+  <!-- Bottom Banner Inscription -->
+  <polygon points="150,380 350,380 370,415 130,415" fill="#0A0E17" stroke="#E5C07B" stroke-width="2.5" />
+  <text x="250" y="404" font-family="'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="900" letter-spacing="6" fill="#E5C07B" text-anchor="middle">AKERGATE</text>
 </svg>

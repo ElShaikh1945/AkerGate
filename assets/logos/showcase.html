@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AkerGate - Logo & Seal Design Showcase (10 Concepts)</title>
+  <title>AkerGate - Flat Logo & Official Stamp Showcase (10 Concepts)</title>
   <style>
     :root {
       --bg-main: #0B0E14;
@@ -22,7 +22,7 @@
       line-height: 1.6;
       padding: 30px 20px;
     }
-    .container { max-width: 1200px; margin: 0 auto; }
+    .container { max-width: 1240px; margin: 0 auto; }
     header {
       text-align: center;
       padding-bottom: 30px;
@@ -37,24 +37,86 @@
     }
     .subtitle {
       color: var(--text-muted);
-      font-size: 1.1rem;
-      max-width: 800px;
+      font-size: 1.05rem;
+      max-width: 880px;
       margin: 0 auto 16px;
+    }
+    .badge-bar {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 14px;
     }
     .badge {
       display: inline-block;
       background: #1C2330;
       border: 1px solid var(--border-card);
       color: var(--accent-cyan);
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       font-weight: 600;
       padding: 4px 14px;
       border-radius: 20px;
       letter-spacing: 1px;
     }
+    .badge-gold {
+      color: var(--accent-gold);
+      border-color: rgba(229, 192, 123, 0.4);
+    }
+    .section-title {
+      color: var(--accent-gold);
+      font-size: 1.5rem;
+      letter-spacing: 1.5px;
+      margin: 40px 0 20px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-card);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .renders-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+    .render-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .render-img-wrap {
+      width: 100%;
+      height: 380px;
+      overflow: hidden;
+      background: #090C11;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .render-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .render-body {
+      padding: 18px 22px;
+    }
+    .render-title {
+      color: var(--accent-gold);
+      font-size: 1.2rem;
+      margin-bottom: 6px;
+    }
+    .render-desc {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
       gap: 28px;
     }
     .card {
@@ -74,11 +136,11 @@
       background: #090C11;
       border: 1px solid #1F2633;
       border-radius: 12px;
-      padding: 16px;
+      padding: 18px;
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 280px;
+      min-height: 290px;
       margin-bottom: 18px;
     }
     .preview-box img {
@@ -147,23 +209,55 @@
 <body>
   <div class="container">
     <header>
-      <h1>AKERGATE LOGO & SEAL SHOWCASE</h1>
-      <p class="subtitle">10 Vector SVG Design Concepts inspired by Ancient Egyptian Deity Aker (The Guardian of Horizon Gates), optimized for circular stamps, GitHub badges, and cyber security branding.</p>
-      <span class="badge">DESIGNED FOR MUHAMMAD EL-SHAIKH | AKERGATE</span>
+      <h1>AKERGATE LOGO & OFFICIAL SEAL SHOWCASE</h1>
+      <p class="subtitle">10 Vector SVG Brand Concepts inspired by the Ancient Egyptian Deity Aker (The Dual Lion Horizon Gatekeeper). Built with 100% flat solid colors (zero gradients), distinct feline lion anatomy, and optimized for instant conversion to physical and digital rubber stamps.</p>
+      <div class="badge-bar">
+        <span class="badge badge-gold">100% FLAT SOLID COLORS (ZERO GRADIENTS)</span>
+        <span class="badge">STAMP & SEAL OPTIMIZED</span>
+        <span class="badge">AUTHOR: MUHAMMAD EL-SHAIKH</span>
+        <span class="badge">POLYFORM NONCOMMERCIAL 1.0.0</span>
+      </div>
     </header>
 
+    <!-- Visual Concept Renders Section -->
+    <h2 class="section-title">Concept Visualizations (Nano Banana AI Engine)</h2>
+    <div class="renders-grid">
+      <div class="render-card">
+        <div class="render-img-wrap">
+          <img src="concept_render_seal.jpg" alt="AkerGate Official Rubber Stamp Concept">
+        </div>
+        <div class="render-body">
+          <h3 class="render-title">Official Wax & Rubber Stamp Concept</h3>
+          <p class="render-desc">Photorealistic physical representation of the AkerGate circular seal pressed into aged papyrus, featuring twin heraldic lions guarding the sun horizon portal.</p>
+        </div>
+      </div>
+      <div class="render-card">
+        <div class="render-img-wrap">
+          <img src="concept_render_emblem.jpg" alt="AkerGate Metallic Security Emblem">
+        </div>
+        <div class="render-body">
+          <h3 class="render-title">High-Security Shield Emblem</h3>
+          <p class="render-desc">Sculpted gold and cyan security insignia depicting the back-to-back lion sentinels (Yesterday & Tomorrow) guarding an impenetrable vault door.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 10 Vector SVG Concepts Grid -->
+    <h2 class="section-title">10 Vector SVG Master Concepts (Flat Architecture)</h2>
     <div class="grid">
+
       <!-- Concept 1 -->
       <div class="card">
         <div class="preview-box">
           <img src="logo_01_classic_aker_crest.svg" alt="Concept 1">
         </div>
-        <h2 class="card-title">01. Classic Aker Horizon Crest</h2>
-        <p class="card-desc">Traditional dual lions of Aker (Yesterday & Tomorrow) guarding the central Akhet horizon sun disc, re-imagined as a cryptographic keyhole.</p>
+        <h3 class="card-title">01. Classic Aker Horizon Crest</h3>
+        <p class="card-desc">Recumbent twin lions with detailed mane tufts, rounded ears, whisker pads, resting paws, and a central Egyptian temple pylon framing a cryptographic keyhole.</p>
         <div class="tags">
           <span class="tag">Dual Lions</span>
-          <span class="tag">Akhet Horizon</span>
-          <span class="tag">Circular Crest</span>
+          <span class="tag">Temple Pylon</span>
+          <span class="tag">Flat Gold & Cyan</span>
+          <span class="tag">Zero Gradients</span>
         </div>
         <div class="btn-row">
           <a class="btn" href="logo_01_classic_aker_crest.svg" target="_blank">View Raw SVG</a>
@@ -175,12 +269,13 @@
         <div class="preview-box">
           <img src="logo_02_cyber_sentinel_shield.svg" alt="Concept 2">
         </div>
-        <h2 class="card-title">02. Cyber Sentinel Shield</h2>
-        <p class="card-desc">Hexagonal defense badge featuring sharp angular low-poly lion geometry fused into a fortified cybersecurity gatekeeper silhouette.</p>
+        <h3 class="card-title">02. Cyber Sentinel Shield</h3>
+        <p class="card-desc">Fortified hexagonal defense badge featuring roaring lion head silhouettes with erect ears, fangs, and flowing mane armor framing an armored vault portal.</p>
         <div class="tags">
           <span class="tag">Hex Shield</span>
-          <span class="tag">Low-Poly</span>
+          <span class="tag">Roaring Lions</span>
           <span class="tag">DevSecOps</span>
+          <span class="tag">Zero Gradients</span>
         </div>
         <div class="btn-row">
           <a class="btn" href="logo_02_cyber_sentinel_shield.svg" target="_blank">View Raw SVG</a>
@@ -192,12 +287,13 @@
         <div class="preview-box">
           <img src="logo_03_royal_pharaonic_seal.svg" alt="Concept 3">
         </div>
-        <h2 class="card-title">03. Royal Pharaonic Stamp</h2>
-        <p class="card-desc">Designed specifically to function as an official circular rubber/digital stamp (ختم رسمي). High contrast silhouette with hieroglyphic cartouche.</p>
+        <h3 class="card-title">03. Royal Pharaonic Stamp</h3>
+        <p class="card-desc">Designed explicitly to serve as an official rubber or ink stamp (ختم رسمي). High-contrast silhouette, concentric borders, cartouche, and prominent lion profiles.</p>
         <div class="tags">
           <span class="tag">Official Seal</span>
-          <span class="tag">Stampable</span>
-          <span class="tag">High Contrast</span>
+          <span class="tag">Stampable (ختم)</span>
+          <span class="tag">Hieroglyphic Base</span>
+          <span class="tag">Zero Gradients</span>
         </div>
         <div class="btn-row">
           <a class="btn" href="logo_03_royal_pharaonic_seal.svg" target="_blank">View Raw SVG</a>
@@ -209,12 +305,13 @@
         <div class="preview-box">
           <img src="logo_04_akhet_solar_padlock.svg" alt="Concept 4">
         </div>
-        <h2 class="card-title">04. Akhet Solar Padlock</h2>
-        <p class="card-desc">The ancient Akhet horizon glyph (𓈌) morphed into a modern cryptographic padlock, flanked by stylized lion resting profiles.</p>
+        <h3 class="card-title">04. Akhet Solar Padlock</h3>
+        <p class="card-desc">Architectural Egyptian temple pylon towers topped with vigilant lion head statues flanking a solid steel shackle and central cryptographic keyhole.</p>
         <div class="tags">
-          <span class="tag">Padlock</span>
-          <span class="tag">Akhet Glyph</span>
-          <span class="tag">App Icon</span>
+          <span class="tag">Architectural Pylon</span>
+          <span class="tag">Lion Statues</span>
+          <span class="tag">Padlock Motif</span>
+          <span class="tag">Zero Gradients</span>
         </div>
         <div class="btn-row">
           <a class="btn" href="logo_04_akhet_solar_padlock.svg" target="_blank">View Raw SVG</a>
@@ -226,12 +323,13 @@
         <div class="preview-box">
           <img src="logo_05_cyber_circuit_lions.svg" alt="Concept 5">
         </div>
-        <h2 class="card-title">05. Cyber Circuit Lions</h2>
-        <p class="card-desc">Twin lion silhouettes traced with glowing PCB circuit lines and conductive nodes guarding a central 3-Factor Nexus (Password, TOTP, Telegram).</p>
+        <h3 class="card-title">05. Cyber Circuit Lions</h3>
+        <p class="card-desc">Electronic circuit board traces outlining anatomical twin lion profiles (ears, eyes, muzzle, paws) guarding an octagonal multi-factor vault door.</p>
         <div class="tags">
-          <span class="tag">Circuit Board</span>
           <span class="tag">PCB Traces</span>
+          <span class="tag">Circuit Lions</span>
           <span class="tag">3-Factor Core</span>
+          <span class="tag">Zero Gradients</span>
         </div>
         <div class="btn-row">
           <a class="btn" href="logo_05_cyber_circuit_lions.svg" target="_blank">View Raw SVG</a>
@@ -243,12 +341,13 @@
         <div class="preview-box">
           <img src="logo_06_hieroglyphic_relief_stamp.svg" alt="Concept 6">
         </div>
-        <h2 class="card-title">06. Hieroglyphic Relief Stamp</h2>
-        <p class="card-desc">Authentic temple wall relief aesthetic featuring the Earth hieroglyph strip ('Ta') and cartouche header. Perfect for monochrome ink stamping.</p>
+        <h3 class="card-title">06. Hieroglyphic Relief Stamp</h3>
+        <p class="card-desc">Authentic Book of the Dead (Papyrus of Ani Spell 17) double lion relief resting on the Egyptian Earth glyph ('Ta'), capped with an authentic royal cartouche.</p>
         <div class="tags">
-          <span class="tag">Stone Relief</span>
+          <span class="tag">Ani Spell 17</span>
+          <span class="tag">Earth Base (Ta)</span>
           <span class="tag">Cartouche</span>
-          <span class="tag">Monochrome Safe</span>
+          <span class="tag">Zero Gradients</span>
         </div>
         <div class="btn-row">
           <a class="btn" href="logo_06_hieroglyphic_relief_stamp.svg" target="_blank">View Raw SVG</a>
@@ -260,12 +359,13 @@
         <div class="preview-box">
           <img src="logo_07_winged_horizon_portal.svg" alt="Concept 7">
         </div>
-        <h2 class="card-title">07. Winged Horizon Portal</h2>
-        <p class="card-desc">Sacred Egyptian winged disc blended with twin lion profiles in royal lapis lazuli and gold, representing the transcendent gatekeeper of the Duat.</p>
+        <h3 class="card-title">07. Winged Horizon Portal</h3>
+        <p class="card-desc">Regal winged solar disc integrated with prominent twin lion guardians in solid lapis lazuli and gold, watching over the gateway between yesterday and tomorrow.</p>
         <div class="tags">
-          <span class="tag">Winged Sun</span>
-          <span class="tag">Lapis Lazuli</span>
-          <span class="tag">Duat Portal</span>
+          <span class="tag">Winged Solar Disc</span>
+          <span class="tag">Lapis & Gold</span>
+          <span class="tag">Duat Sentinels</span>
+          <span class="tag">Zero Gradients</span>
         </div>
         <div class="btn-row">
           <a class="btn" href="logo_07_winged_horizon_portal.svg" target="_blank">View Raw SVG</a>
@@ -277,12 +377,13 @@
         <div class="preview-box">
           <img src="logo_08_geometric_hex_sentinel.svg" alt="Concept 8">
         </div>
-        <h2 class="card-title">08. Geometric Hex Sentinel</h2>
-        <p class="card-desc">Interlocking precision polygons forming symmetrical lion facets and a central cryptographic key nexus. Clean, modern, and tech-forward.</p>
+        <h3 class="card-title">08. Geometric Hex Sentinel</h3>
+        <p class="card-desc">Faceted low-poly geometric lion heads with sharp pointed ears, brow ridges, snouts, whisker facets, and a central cryptographic keystone nexus.</p>
         <div class="tags">
-          <span class="tag">Geometric</span>
-          <span class="tag">Hexagonal</span>
-          <span class="tag">Modern Tech</span>
+          <span class="tag">Low-Poly Lion</span>
+          <span class="tag">Hexagonal Nexus</span>
+          <span class="tag">Modern Facets</span>
+          <span class="tag">Zero Gradients</span>
         </div>
         <div class="btn-row">
           <a class="btn" href="logo_08_geometric_hex_sentinel.svg" target="_blank">View Raw SVG</a>
@@ -294,12 +395,13 @@
         <div class="preview-box">
           <img src="logo_09_ouroboros_gateway_ring.svg" alt="Concept 9">
         </div>
-        <h2 class="card-title">09. Ouroboros Gateway Ring</h2>
-        <p class="card-desc">Continuous temporal ring with twin lion heads emerging from sunrise and sunset around the central hardware RTC clockwork core.</p>
+        <h3 class="card-title">09. Ouroboros Temporal Seal</h3>
+        <p class="card-desc">Heavy circular coin seal with 60-second temporal tick indices, twin recumbent lions extending their paws, and an architectural portal under radiant solar corona.</p>
         <div class="tags">
-          <span class="tag">RTC Temporal</span>
-          <span class="tag">Infinite Loop</span>
-          <span class="tag">Clockwork Core</span>
+          <span class="tag">RTC Temporal Ring</span>
+          <span class="tag">Paws & Manes</span>
+          <span class="tag">Coin Seal</span>
+          <span class="tag">Zero Gradients</span>
         </div>
         <div class="btn-row">
           <a class="btn" href="logo_09_ouroboros_gateway_ring.svg" target="_blank">View Raw SVG</a>
@@ -311,17 +413,19 @@
         <div class="preview-box">
           <img src="logo_10_minimal_monoline_glyph.svg" alt="Concept 10">
         </div>
-        <h2 class="card-title">10. Minimal Monoline Glyph</h2>
-        <p class="card-desc">Single uniform line weight monoline icon. Minimalist, elegant, high scalability for app favicons, terminal banners, and GitHub avatar.</p>
+        <h3 class="card-title">10. Minimal Monoline Glyph</h3>
+        <p class="card-desc">Bold uniform 6px monoline drawing of twin lion profiles (ears, brows, snouts, jaws, manes, resting paws) framing a central security pylon arch and solar core.</p>
         <div class="tags">
-          <span class="tag">Monoline</span>
-          <span class="tag">Minimalist</span>
-          <span class="tag">Favicon Ready</span>
+          <span class="tag">6px Monoline</span>
+          <span class="tag">Clean Silhouette</span>
+          <span class="tag">App Icon & Stamp</span>
+          <span class="tag">Zero Gradients</span>
         </div>
         <div class="btn-row">
           <a class="btn" href="logo_10_minimal_monoline_glyph.svg" target="_blank">View Raw SVG</a>
         </div>
       </div>
+
     </div>
 
     <footer>

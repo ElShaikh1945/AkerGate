@@ -1,32 +1,85 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
-  <!-- Dark Minimal Background -->
-  <rect width="500" height="500" rx="36" fill="#090D12" />
+  <!-- Background (100% Flat Solid Color) -->
+  <rect width="500" height="500" rx="32" fill="#0A0E17" />
 
-  <!-- Single Continuous Monoline Weight = 7px -->
-  <!-- Left Lion & Horizon Arc -->
-  <path d="M 120,350 L 150,350 C 180,350 200,330 200,290 C 200,250 180,240 160,230 C 140,220 120,200 120,170 C 120,130 150,110 185,110 C 210,110 225,125 230,145" 
-        fill="none" stroke="#E5C07B" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+  <!-- Outer Minimalist Bounding Frame (Rounded Stamp Boundary) -->
+  <rect x="30" y="30" width="440" height="440" rx="28" fill="none" stroke="#1E2838" stroke-width="3" />
+  <rect x="42" y="42" width="416" height="416" rx="20" fill="none" stroke="#E5C07B" stroke-width="1.5" stroke-dasharray="4 8" />
 
-  <!-- Right Lion & Horizon Arc (Symmetrical) -->
-  <path d="M 380,350 L 350,350 C 320,350 300,330 300,290 C 300,250 320,240 340,230 C 360,220 380,200 380,170 C 380,130 350,110 315,110 C 290,110 275,125 270,145" 
-        fill="none" stroke="#E5C07B" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+  <!-- ==================== MONOLINE TWIN SENTINEL LIONS ==================== -->
+  <!-- Solid Stroke Style: 6px Gold Lines with Round Caps & Joins -->
+  <g fill="none" stroke="#E5C07B" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
 
-  <!-- Left Lion Eye -->
-  <circle cx="160" cy="155" r="7" fill="#56B6C2" />
+    <!-- HORIZON GROUND BASELINE -->
+    <line x1="60" y1="340" x2="440" y2="340" stroke-width="7" />
 
-  <!-- Right Lion Eye -->
-  <circle cx="340" cy="155" r="7" fill="#56B6C2" />
+    <!-- LEFT LION: Yesterday / Sef (West Facing) -->
+    <!-- Lion Head, Ear, Brow, Snout, Jaw, Neck & Back Contour -->
+    <path d="M 210,240 
+             C 210,180 185,150 155,145 
+             C 152,130 142,120 130,125 
+             C 120,130 122,148 126,155 
+             C 105,165 92,185 80,188 
+             L 55,190 
+             L 52,205 
+             C 65,212 75,215 88,215 
+             C 85,228 92,238 108,240 
+             C 120,265 140,290 140,340" />
 
-  <!-- Central Rising Solar Disc (Horizon Portal) -->
-  <circle cx="250" cy="195" r="34" fill="none" stroke="#56B6C2" stroke-width="7" />
-  <circle cx="250" cy="195" r="14" fill="#E5C07B" />
+    <!-- Left Resting Foreleg & Paw Extending Left -->
+    <path d="M 140,310 L 70,310 C 60,310 52,320 52,340" />
+    <!-- Paw Knuckle Detailing -->
+    <line x1="72" y1="324" x2="72" y2="340" stroke-width="4" />
+    <line x1="88" y1="324" x2="88" y2="340" stroke-width="4" />
 
-  <!-- Central Gateway Keyhole / Pillar -->
-  <line x1="250" y1="240" x2="250" y2="350" stroke="#E5C07B" stroke-width="7" stroke-linecap="round" />
+    <!-- Left Mane Interior Contour Line -->
+    <path d="M 160,175 C 145,190 135,215 132,245 C 130,275 145,305 175,320" stroke-width="4" />
 
-  <!-- Bottom Horizon Ground Line -->
-  <line x1="90" y1="350" x2="410" y2="350" stroke="#E5C07B" stroke-width="7" stroke-linecap="round" />
+    <!-- RIGHT LION: Tomorrow / Duau (East Facing) - Mirrored Geometry -->
+    <!-- Lion Head, Ear, Brow, Snout, Jaw, Neck & Back Contour -->
+    <path d="M 290,240 
+             C 290,180 315,150 345,145 
+             C 348,130 358,120 370,125 
+             C 380,130 378,148 374,155 
+             C 395,165 408,185 420,188 
+             L 445,190 
+             L 448,205 
+             C 435,212 425,215 412,215 
+             C 415,228 408,238 392,240 
+             C 380,265 360,290 360,340" />
 
-  <!-- Clean Minimalist Wordmark -->
-  <text x="250" y="425" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="28" font-weight="900" letter-spacing="10" fill="#E5C07B" text-anchor="middle">AKERGATE</text>
+    <!-- Right Resting Foreleg & Paw Extending Right -->
+    <path d="M 360,310 L 430,310 C 440,310 448,320 448,340" />
+    <!-- Paw Knuckle Detailing -->
+    <line x1="428" y1="324" x2="428" y2="340" stroke-width="4" />
+    <line x1="412" y1="324" x2="412" y2="340" stroke-width="4" />
+
+    <!-- Right Mane Interior Contour Line -->
+    <path d="M 340,175 C 355,190 365,215 368,245 C 370,275 355,305 325,320" stroke-width="4" />
+
+    <!-- ==================== CENTRAL HORIZON PORTAL ==================== -->
+    <!-- Architectural Pylon Gate Framing between the Lions' Backs -->
+    <path d="M 205,340 L 215,210 L 285,210 L 295,340" stroke-width="5" />
+    <line x1="200" y1="210" x2="300" y2="210" stroke-width="7" />
+
+    <!-- Central Keyhole Vault Outline -->
+    <path d="M 235,340 L 235,275 C 235,260 265,260 265,275 L 265,340" stroke="#56B6C2" stroke-width="5" />
+
+    <!-- Rising Solar Disc Over Portal -->
+    <circle cx="250" cy="150" r="26" stroke="#56B6C2" stroke-width="6" />
+  </g>
+
+  <!-- Cyan Feline Eyes (Solid Contrast Accents) -->
+  <polygon points="90,192 104,189 98,198" fill="#56B6C2" />
+  <polygon points="410,192 396,189 402,198" fill="#56B6C2" />
+
+  <!-- Center Solar Core Disc (Flat Solid Gold) -->
+  <circle cx="250" cy="150" r="12" fill="#E5C07B" />
+
+  <!-- Vault Keyhole Core Dot -->
+  <circle cx="250" cy="275" r="5" fill="#56B6C2" />
+
+  <!-- ==================== CLEAN MINIMAL WORDMARK ==================== -->
+  <text x="250" y="395" font-family="'Segoe UI', -apple-system, Roboto, sans-serif" font-size="24" font-weight="900" letter-spacing="10" fill="#E5C07B" text-anchor="middle">AKERGATE</text>
+  <text x="250" y="422" font-family="'Segoe UI', -apple-system, Roboto, sans-serif" font-size="9" font-weight="700" letter-spacing="5" fill="#56B6C2" text-anchor="middle">MINIMAL MONOLINE GLYPH</text>
 </svg>

@@ -27,6 +27,7 @@ ENV/
 
 # AkerGate Local Runtime and Secrets
 *.key
+*.bundle.js
 active_tokens.json
 burned_tokens.json
 offline_queue.jsonl

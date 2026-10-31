@@ -53,6 +53,12 @@ from akergate.sentry.notifier import (
     get_telegram_webhook_info,
     delete_telegram_webhook
 )
+from akergate.core.serverless_deployer import (
+    sync_telegram_serverless_config,
+    sync_cloudflare_worker_bundle,
+    run_tgcloud_push,
+    run_wrangler_deploy
+)
 from akergate.i18n import t, get_current_language, set_language, list_available_languages
 
 _last_net_check_time = 0.0
@@ -312,6 +318,140 @@ def render_totp_setup():
             break
 
 # ─────────────────────────────────────────────────────────────────────────────
+# AUTOMATED SERVERLESS DEPLOYMENT WIZARD
+# ─────────────────────────────────────────────────────────────────────────────
+def render_serverless_wizard():
+    """
+    Automated Serverless Deployment Wizard.
+    Guides the user through deploying to Telegram Serverless or Cloudflare with zero friction.
+    """
+    config = load_config()
+    tg_cfg = config.get("telegram", {})
+    bot_token = tg_cfg.get("bot_token", "")
+    chat_id = tg_cfg.get("allowed_chat_id", 0)
+    secret = get_telegram_secret()
+
+    while True:
+        def draw_wizard_header():
+            print_header("Serverless Deployment Wizard")
+            table = Table(box=None, expand=True, padding=(0, 1))
+            table.add_column("Property", style="bold cyan", width=24)
+            table.add_column("Status", style="bold")
+            table.add_row("Bot Token", f"{bot_token[:8]}..." if bot_token else "[yellow]NOT CONFIGURED[/yellow]")
+            table.add_row("Allowed Chat ID", str(chat_id) if chat_id else "[yellow]NOT CONFIGURED[/yellow]")
+            table.add_row("Shared Secret", "[green]READY[/green]" if secret else "[yellow]NOT SET[/yellow]")
+            console.print(Panel(table, title="[bold]Deployment Credentials Readiness[/bold]", border_style="cyan"))
+
+        wizard_options = [
+            ("Deploy to Telegram Serverless (Official tgcloud.ai)", "Auto-configures and pushes code directly to Telegram V8 cloud"),
+            ("Deploy to Cloudflare Workers (Auto Bundle & Webhook)", "Pre-bundles standalone worker.bundle.js & auto-registers webhook"),
+            ("Auto-Sync Host Credentials to All Backend Templates", "Injects current Chat ID & Secret into all local template files"),
+            ("Return to Telegram Menu", "Go back to previous menu")
+        ]
+
+        choice = select_menu(
+            wizard_options,
+            title="Choose Automated Deployment Target",
+            on_render_header=draw_wizard_header
+        )
+
+        if choice == 0:
+            if not chat_id:
+                new_id_str = Prompt.ask("\nEnter your Telegram User ID (from @userinfobot)")
+                try:
+                    chat_id = int(new_id_str)
+                    tg_cfg["allowed_chat_id"] = chat_id
+                    config["telegram"] = tg_cfg
+                    save_config(config)
+                except ValueError:
+                    console.print("[!] Invalid chat ID.", style="bold red")
+                    time.sleep(1.5)
+                    continue
+
+            console.print("\n[bold cyan]Step 1: BotFather Activation[/bold cyan]")
+            console.print("1. Open Telegram and message [bold]@BotFather[/bold]")
+            console.print("2. Send /mybots -> choose your bot -> [bold]Serverless[/bold] -> [bold]Turn On[/bold]")
+            confirmed = Confirm.ask("\nHave you enabled Serverless on @BotFather for your bot?")
+            if not confirmed:
+                console.print("[yellow]Please enable it first in @BotFather to authorize deployments.[/yellow]")
+                time.sleep(2)
+                continue
+
+            console.print("\n[*] Auto-generating tgcloud configuration...", style="cyan")
+            ok, msg = sync_telegram_serverless_config()
+            if not ok:
+                console.print(f"[!] {msg}", style="bold red")
+                time.sleep(2)
+                continue
+            console.print(f"[+] {msg}", style="bold green")
+
+            console.print("\n[*] Pushing to Telegram Serverless (npx @tgcloud/cli push)...", style="cyan")
+            console.print("[dim]If this is your first time, you may be prompted to login with your BotFather token.[/dim]\n")
+            
+            run_deploy = Confirm.ask("Execute automated deployment now?")
+            if run_deploy:
+                success, output = run_tgcloud_push()
+                if success:
+                    tg_cfg["backend"] = "telegram_serverless"
+                    config["telegram"] = tg_cfg
+                    save_config(config)
+                    console.print(f"\n[+] DEPLOYMENT SUCCEEDED!\n{output}", style="bold green")
+                else:
+                    console.print(f"\n[!] Deployment Output:\n{output}", style="yellow")
+                    console.print("\n[dim]To run manually in terminal: cd telegram_backends/telegram_serverless && npx @tgcloud/cli push[/dim]")
+                wait_for_key("Press any key to return...")
+
+        elif choice == 1:
+            console.print("\n[*] Generating pre-bundled Cloudflare Worker...", style="cyan")
+            ok, msg = sync_cloudflare_worker_bundle()
+            if ok:
+                console.print(f"[+] {msg}", style="bold green")
+                console.print("\n[bold]Two Easy Options to Complete Cloudflare Deployment:[/bold]")
+                console.print("  [bold cyan]Method A (Web Dashboard - 30 seconds):[/bold cyan]")
+                console.print("  1. Open dash.cloudflare.com -> Workers & Pages -> Create Application.")
+                console.print("  2. Click 'Quick edit', paste the full contents of:")
+                console.print("     [bold yellow]telegram_backends/cloudflare_worker/worker.bundle.js[/bold yellow]")
+                console.print("  3. Click 'Deploy'. Everything (secrets, token, chat ID) is already baked in!")
+                console.print("\n  [bold cyan]Method B (Wrangler CLI):[/bold cyan]")
+                console.print("  Run in terminal: [dim]cd telegram_backends/cloudflare_worker && npx wrangler deploy worker.bundle.js[/dim]")
+
+                registered = Confirm.ask("\nDo you have the deployed Worker URL ready to link to Telegram now?")
+                if registered:
+                    worker_url = Prompt.ask("Enter Worker URL (e.g. https://my-bot.workers.dev)")
+                    if worker_url:
+                        if not bot_token:
+                            bot_token = Prompt.ask("Enter Telegram Bot Token")
+                            tg_cfg["bot_token"] = bot_token
+                            config["telegram"] = tg_cfg
+                            save_config(config)
+                        ok_wh, msg_wh = set_telegram_webhook(bot_token, worker_url)
+                        if ok_wh:
+                            tg_cfg["webhook_url"] = worker_url
+                            tg_cfg["backend"] = "serverless"
+                            config["telegram"] = tg_cfg
+                            save_config(config)
+                            console.print(f"[+] Webhook registered successfully! {msg_wh}", style="bold green")
+                        else:
+                            console.print(f"[!] Failed to register webhook: {msg_wh}", style="bold red")
+                wait_for_key("Press any key to return...")
+            else:
+                console.print(f"[!] {msg}", style="bold red")
+                time.sleep(2)
+
+        elif choice == 2:
+            console.print("\n[*] Auto-syncing credentials to all backend templates...", style="cyan")
+            ok1, m1 = sync_telegram_serverless_config()
+            ok2, m2 = sync_cloudflare_worker_bundle()
+            if ok1: console.print(f"[+] Telegram Serverless: {m1}", style="green")
+            else: console.print(f"[!] Telegram Serverless: {m1}", style="yellow")
+            if ok2: console.print(f"[+] Cloudflare Worker: {m2}", style="green")
+            else: console.print(f"[!] Cloudflare Worker: {m2}", style="yellow")
+            time.sleep(2)
+
+        elif choice == 3 or choice == len(wizard_options) - 1:
+            break
+
+# ─────────────────────────────────────────────────────────────────────────────
 # TAB 4: TELEGRAM BOT SETUP
 # ─────────────────────────────────────────────────────────────────────────────
 def render_telegram_setup():
@@ -349,7 +489,7 @@ def render_telegram_setup():
             table.add_row("Backend Architecture", backend_label)
             table.add_row("Deployment Target", deploy_info)
             if backend in ("cloudflare", "serverless"):
-                table.add_row("Webhook URL", f"[dim]{webhook_url}[/dim]" if webhook_url else "[dim]Not registered (set via Option 3)[/dim]")
+                table.add_row("Webhook URL", f"[dim]{webhook_url}[/dim]" if webhook_url else "[dim]Not registered (set via Option 4)[/dim]")
             elif backend == "telegram_serverless":
                 table.add_row("Official Docs", "https://core.telegram.org/bots/serverless")
             table.add_row("Bot Token", f"{bot_token[:8]}..." if bot_token else "[yellow]UNSET[/yellow]")
@@ -362,8 +502,9 @@ def render_telegram_setup():
             console.print(f"Sample Valid 7-Digit OTP for Current Window: [bold green]{sample_otp}[/bold green]")
 
         options = [
-            ("Select Backend Mode", "Choose between Telegram Serverless (tgcloud), Cloudflare, or Standalone"),
+            ("Automated Serverless Setup Wizard", "1-Click automated deployer for Telegram Serverless & Cloudflare"),
             ("Configure Bot Token & Chat ID", "Set Telegram Bot credentials for offline OTP generation"),
+            ("Select Backend Mode", "Choose between Telegram Serverless (tgcloud), Cloudflare, or Standalone"),
             ("Register / Update Serverless Webhook URL", "Link Telegram directly to your deployed Serverless function"),
             ("Test 7-Digit Offline OTP", "Verify a 7-digit OTP against the RTC epoch window"),
             ("Return to Previous Menu", "Go back to Multi-Factor Authentication menu")
@@ -377,6 +518,32 @@ def render_telegram_setup():
         )
 
         if choice_idx == 0:
+            render_serverless_wizard()
+            config = load_config()
+            tg_cfg = config.get("telegram", {})
+            bot_token = tg_cfg.get("bot_token", "")
+            chat_id = tg_cfg.get("allowed_chat_id", 0)
+            backend = tg_cfg.get("backend", "serverless")
+            webhook_url = tg_cfg.get("webhook_url", "")
+
+        elif choice_idx == 1:
+            bot_token = tg_cfg.get("bot_token", "")
+            chat_id = tg_cfg.get("allowed_chat_id", 0)
+            new_token = Prompt.ask("\nEnter Telegram Bot Token (from @BotFather)", default=bot_token)
+            new_id_str = Prompt.ask("Enter your Telegram User ID (from @userinfobot)", default=str(chat_id))
+            try:
+                new_id = int(new_id_str)
+            except ValueError:
+                new_id = 0
+                
+            tg_cfg["bot_token"] = new_token
+            tg_cfg["allowed_chat_id"] = new_id
+            config["telegram"] = tg_cfg
+            save_config(config)
+            console.print("[+] Telegram credentials updated.", style="green")
+            time.sleep(1)
+
+        elif choice_idx == 2:
             def draw_backend_picker():
                 print_header("Choose Backend Mode")
 
@@ -408,24 +575,7 @@ def render_telegram_setup():
                 console.print("\n[+] Backend set to STANDALONE DAEMON.", style="bold green")
                 time.sleep(1)
 
-        elif choice_idx == 1:
-            bot_token = tg_cfg.get("bot_token", "")
-            chat_id = tg_cfg.get("allowed_chat_id", 0)
-            new_token = Prompt.ask("\nEnter Telegram Bot Token (from @BotFather)", default=bot_token)
-            new_id_str = Prompt.ask("Enter your Telegram User ID (from @userinfobot)", default=str(chat_id))
-            try:
-                new_id = int(new_id_str)
-            except ValueError:
-                new_id = 0
-                
-            tg_cfg["bot_token"] = new_token
-            tg_cfg["allowed_chat_id"] = new_id
-            config["telegram"] = tg_cfg
-            save_config(config)
-            console.print("[+] Telegram credentials updated.", style="green")
-            time.sleep(1)
-
-        elif choice_idx == 2:
+        elif choice_idx == 3:
             bot_token = tg_cfg.get("bot_token", "")
             if not bot_token:
                 console.print("\n[!] Please configure your Bot Token first (Option 2).", style="bold red")
@@ -450,7 +600,7 @@ def render_telegram_setup():
                     console.print(f"[!] Failed to register webhook: {msg}", style="bold red")
                 time.sleep(2)
 
-        elif choice_idx == 3:
+        elif choice_idx == 4:
             test_code = Prompt.ask("\nEnter 7-digit Telegram OTP")
             valid, token_id = verify_windowed_otp(secret, test_code)
             if valid:
@@ -459,7 +609,7 @@ def render_telegram_setup():
                 console.print("[!] Invalid OTP or expired epoch window.", style="bold red")
             wait_for_key("Press any key to return...")
 
-        elif choice_idx == 4 or choice_idx == len(options) - 1:
+        elif choice_idx == 5 or choice_idx == len(options) - 1:
             break
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -191,26 +191,32 @@ class TestAkerGateCore(unittest.TestCase):
         from akergate.tui.ascii_banner import (
             load_banner_data,
             get_ansi_banner,
-            get_rich_banner
+            get_rich_banner,
+            get_compact_banner,
+            get_compact_rich_banner
         )
         data = load_banner_data()
         self.assertIsNotNone(data)
         self.assertIn("rows", data)
         self.assertEqual(len(data["rows"]), 61)
 
-        # Test ANSI string generation
-        full_banner = get_ansi_banner(trim_margins=False)
-        self.assertGreater(len(full_banner), 1000)
+        # 1. Test Compact 14-line Banner (Default for CLI / TUI)
+        compact = get_compact_banner()
+        self.assertEqual(len(compact.splitlines()), 14)
+        self.assertIn("AKERGATE", compact)
+        self.assertIn("SEF", compact)
+        self.assertIn("DUAU", compact)
+
+        compact_rich = get_compact_rich_banner()
+        self.assertEqual(len(compact_rich.plain.splitlines()), 14)
+
+        # 2. Test Full 61-line Artwork
+        full_banner = get_ansi_banner(full=True)
+        self.assertEqual(len(full_banner.splitlines()), 61)
         self.assertIn("\033[38;2;", full_banner)
 
-        # Test trimmed banner
-        trimmed_banner = get_ansi_banner(trim_margins=True)
-        self.assertGreater(len(trimmed_banner), 1000)
-
-        # Test Rich text object
-        rich_banner = get_rich_banner(trim_margins=True)
-        self.assertIsNotNone(rich_banner)
-        self.assertEqual(len(rich_banner.plain.splitlines()), 61)
+        full_rich = get_rich_banner(full=True)
+        self.assertEqual(len(full_rich.plain.splitlines()), 61)
 
 if __name__ == "__main__":
     unittest.main()

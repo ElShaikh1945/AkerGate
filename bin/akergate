@@ -17,6 +17,7 @@ from akergate.core.storage import get_totp_secret, get_telegram_secret
 from akergate.core.totp import compute_totp, build_otpauth_uri
 from akergate.pam.patcher import is_pam_patched, patch_pam, unpatch_pam
 from akergate.tui.qr_render import generate_terminal_qr
+from akergate.tui.ascii_banner import print_banner
 from akergate.tui.app import main_tui
 from akergate.i18n import t, get_current_language, set_language, list_available_languages
 
@@ -34,6 +35,7 @@ def print_help():
     print(f"  {t('cli.cmd_disarm')}")
     print(f"  {t('cli.cmd_report')}")
     print(f"  {t('cli.cmd_sentry')}")
+    print(f"  {t('cli.cmd_banner')}")
     print(f"  lang [code] Switch or display language ({', '.join(list_available_languages())})")
     print(f"  {t('cli.cmd_help')}")
 
@@ -46,6 +48,8 @@ def main():
 
     if cmd in ("-h", "--help", "help"):
         print_help()
+    elif cmd in ("banner", "logo", "about"):
+        print_banner()
     elif cmd == "lang":
         if len(sys.argv) > 2:
             new_l = sys.argv[2].lower()

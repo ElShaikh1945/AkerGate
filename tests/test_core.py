@@ -187,5 +187,30 @@ class TestAkerGateCore(unittest.TestCase):
         # Reset back to English
         set_language("en")
 
+    def test_ascii_banner_engine(self):
+        from akergate.tui.ascii_banner import (
+            load_banner_data,
+            get_ansi_banner,
+            get_rich_banner
+        )
+        data = load_banner_data()
+        self.assertIsNotNone(data)
+        self.assertIn("rows", data)
+        self.assertEqual(len(data["rows"]), 61)
+
+        # Test ANSI string generation
+        full_banner = get_ansi_banner(trim_margins=False)
+        self.assertGreater(len(full_banner), 1000)
+        self.assertIn("\033[38;2;", full_banner)
+
+        # Test trimmed banner
+        trimmed_banner = get_ansi_banner(trim_margins=True)
+        self.assertGreater(len(trimmed_banner), 1000)
+
+        # Test Rich text object
+        rich_banner = get_rich_banner(trim_margins=True)
+        self.assertIsNotNone(rich_banner)
+        self.assertEqual(len(rich_banner.plain.splitlines()), 61)
+
 if __name__ == "__main__":
     unittest.main()

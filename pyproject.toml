@@ -24,3 +24,6 @@ akergate-pam = "akergate.core.pam_hook:main"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["akergate*"]
+
+[tool.setuptools.package-data]
+akergate = ["data/*.json", "i18n/locales/*.json"]

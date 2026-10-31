@@ -60,6 +60,7 @@ def print_header(active_tab: str = "Dashboard"):
         ("5", t("tabs.sentry")),
         ("6", t("tabs.logs")),
         ("7", t("tabs.lockdown")),
+        ("0", t("tabs.banner")),
         ("L", f"Lang: {get_current_language().upper()}"),
         ("Q", t("tabs.quit"))
     ]
@@ -582,6 +583,18 @@ def render_lockdown():
             console.print("[dim]No incident report found.[/dim]")
         Prompt.ask("\nPress Enter to return")
 
+def render_banner_screen():
+    from akergate.tui.ascii_banner import get_rich_banner
+    banner = get_rich_banner(trim_margins=True)
+    console.print(Panel(
+        banner,
+        title=f"[bold #E5C07B]{t('tabs.banner').upper()}[/bold #E5C07B] - {APP_NAME.upper()} [v{APP_VERSION}]",
+        subtitle=f"[#56B6C2]Dual Sentinel Horizon (Yesterday & Tomorrow) | Author: {AUTHOR}[/#56B6C2]",
+        border_style="#E5C07B",
+        padding=(0, 1)
+    ))
+    Prompt.ask(f"\n[dim]{t('services.press_enter')}[/dim]")
+
 # ─────────────────────────────────────────────────────────────────────────────
 # MAIN TUI LOOP
 # ─────────────────────────────────────────────────────────────────────────────
@@ -595,9 +608,10 @@ def main_tui():
         if active_tab == "Dashboard":
             render_dashboard()
             console.print(f"\n[bold]{t('app.select_view')}[/bold]")
-            key = Prompt.ask("Action", choices=["1", "2", "3", "4", "5", "6", "7", "l", "L", "q", "Q"], default="1")
+            key = Prompt.ask("Action", choices=["0", "1", "2", "3", "4", "5", "6", "7", "l", "L", "q", "Q"], default="1")
             
-            if key == "1": active_tab = "Dashboard"
+            if key == "0": active_tab = "Banner"
+            elif key == "1": active_tab = "Dashboard"
             elif key == "2": active_tab = "Services"
             elif key == "3": active_tab = "TOTP / QR"
             elif key == "4": active_tab = "Telegram"
@@ -610,6 +624,10 @@ def main_tui():
                 set_language(nxt)
             elif key in ("q", "Q"): break
             
+        elif active_tab == "Banner":
+            render_banner_screen()
+            active_tab = "Dashboard"
+
         elif active_tab == "Services":
             render_services()
             active_tab = "Dashboard"

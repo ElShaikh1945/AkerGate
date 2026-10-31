@@ -69,7 +69,7 @@ sudo apt install -y python3 python3-rich python3-qrcode
 
 ### Install AkerGate:
 ```bash
-git clone https://github.com/Yuki/AkerGate.git
+git clone https://github.com/ElShaikh1945/AkerGate.git
 cd AkerGate
 sudo ./install.sh
 ```
@@ -84,6 +84,7 @@ sudo akergate
 ```
 
 ### CLI Shortcut Commands:
+* `akergate banner`   : Display official TrueColor ASCII Sentinel logo in terminal.
 * `akergate status`   : Display active PAM status, keys, and clock health.
 * `akergate qr`       : Display the TOTP QR code directly in the terminal for phone scanning.
 * `akergate lang [ar|en]` : Switch interface language or display current locale.

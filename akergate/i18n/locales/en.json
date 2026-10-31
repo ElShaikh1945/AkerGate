@@ -14,6 +14,7 @@
     "sentry": "Sentry",
     "logs": "Audit Logs",
     "lockdown": "Lockdown",
+    "banner": "Sentinel Logo",
     "quit": "Quit"
   },
   "dashboard": {
@@ -204,6 +205,7 @@
     "cmd_disarm": "disarm      Disarm emergency lockdown and restore flexible multi-auth",
     "cmd_report": "report      Display latest forensic incident report",
     "cmd_sentry": "sentry      Run background Sentry event monitor daemon",
+    "cmd_banner": "banner      Display official TrueColor ASCII Sentinel logo",
     "cmd_help": "help        Show this help message",
     "status_pam": "[i] PAM Hook Status:     {status}",
     "status_totp": "[i] TOTP Configured:     {status}",

@@ -3,7 +3,7 @@
     "name": "AkerGate",
     "version": "0.1.0",
     "subtitle": "نظام المصادقة الموحد لـ LINUX PAM",
-    "credits": "تطوير: Yuki | غير تجاري",
+    "credits": "تطوير: Muhammad El-Shaikh | غير تجاري",
     "select_view": "اختر الشاشة [1-7] أو [Q] للخروج:"
   },
   "tabs": {

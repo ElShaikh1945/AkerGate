@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # AkerGate - Installation Script
-# Developed by Yuki | Non-Commercial
+# Developed by Muhammad El-Shaikh | Non-Commercial
 #
 
 set -e

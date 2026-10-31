@@ -1,6 +1,6 @@
 # AkerGate (أكر جيت)
 ### Unified Multi-Auth PAM Engine for Linux (Password | TOTP | Telegram OTP)
-**Developed by Yuki** | **License: PolyForm Noncommercial 1.0.0**
+**Developed by Muhammad El-Shaikh** | **License: PolyForm Noncommercial 1.0.0**
 
 ```text
     _    _             ____       _       
@@ -102,11 +102,30 @@ AkerGate supports two deployment models for the Telegram OTP generator:
 
 ### Option A: Serverless Cloudflare Worker (Recommended - 100% Free)
 A ready-to-deploy Cloudflare Worker script is included under `telegram_backends/cloudflare_worker/worker.js`.
-1. Create a bot using `@BotFather` on Telegram to get your `BOT_TOKEN`.
-2. Get your numeric ID using `@userinfobot` to set `ALLOWED_CHAT_ID`.
-3. In Cloudflare Workers, create a worker and paste `worker.js`.
-4. Add Secrets: `BOT_TOKEN`, `ALLOWED_CHAT_ID`, and `SHARED_SECRET` (generated in `akergate`).
-5. Send `/otp` to your bot anytime from your phone!
+Deployment takes under 2 minutes and requires zero servers:
+
+1. **Get Bot Credentials:**
+   * Create a bot using `@BotFather` on Telegram to get your `BOT_TOKEN`.
+   * Get your numeric user ID from `@userinfobot` on Telegram (`ALLOWED_CHAT_ID`).
+   * Get your Base32 shared secret key from AkerGate (`akergate` -> Tab 4, or `cat /etc/akergate/telegram_secret.key`).
+
+2. **Deploy via Cloudflare Web Dashboard (No CLI required):**
+   * Log into [Cloudflare Dashboard](https://dash.cloudflare.com/) -> **Compute (Workers & Pages)** -> **Create Application** -> **Create Worker**.
+   * Give it a name (e.g. `akergate-bot`) and click **Deploy**.
+   * Click **Edit code**, replace everything in the editor with the contents of `telegram_backends/cloudflare_worker/worker.js`, and click **Deploy**.
+   * Go to **Settings** -> **Variables and Secrets** and add these 3 Secrets:
+     * `BOT_TOKEN`: Your Telegram bot token.
+     * `ALLOWED_CHAT_ID`: Your Telegram numeric user ID.
+     * `SHARED_SECRET`: Your Base32 shared secret.
+
+3. **Link Telegram to your Worker (One-Time Webhook Activation):**
+   Open your browser or terminal and visit this URL (replace with your values):
+   ```text
+   https://api.telegram.org/bot<BOT_TOKEN>/setWebhook?url=https://<YOUR_WORKER_NAME>.<YOUR_SUBDOMAIN>.workers.dev
+   ```
+   Telegram will respond with `{"ok":true,"result":true,"description":"Webhook was set"}`.
+
+4. **Done!** Open your bot on Telegram and type `/otp` anytime from your phone!
 
 ### Option B: Standalone VPS / Docker Daemon
 For users running their own VPS, server, or Raspberry Pi:
@@ -134,6 +153,6 @@ AkerGate allows granular toggles for specific system services via the TUI:
 
 This project is licensed under the **PolyForm Noncommercial License 1.0.0**.
 
-* **Author:** Yuki
+* **Author:** Muhammad El-Shaikh
 * **Commercial Use:** Strictly prohibited without explicit written permission.
 * **Redistribution & Modification:** Permitted for personal, educational, and open-source non-commercial use, provided that original author credits, notices, and links to this repository are prominently preserved.

@@ -11,7 +11,7 @@ from pathlib import Path
 # Application metadata
 APP_NAME = "AkerGate"
 APP_VERSION = "0.1.0"
-AUTHOR = "Yuki"
+AUTHOR = "Muhammad El-Shaikh"
 
 # System Paths (Root mode)
 SYSTEM_CONFIG_DIR = Path("/etc/akergate")

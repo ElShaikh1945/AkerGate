@@ -3,7 +3,7 @@
     "name": "AkerGate",
     "version": "0.1.0",
     "subtitle": "MULTI-AUTH LINUX PAM MANAGER",
-    "credits": "Developed by Yuki | Non-Commercial",
+    "credits": "Developed by Muhammad El-Shaikh | Non-Commercial",
     "select_view": "Select view [1-7] or [Q] to quit:"
   },
   "tabs": {

@@ -158,30 +158,36 @@ flowchart TD
 
 ---
 
-## المرحلة 5: عامل Telegram OTP غير المتصل (Serverless & Standalone)
+## المرحلة 5: عامل Telegram OTP غير المتصل (Telegram Serverless & Webhooks)
 
-التحقق من العامل الاحتياطي المكون من 7 أرقام والذي يعمل بنوافذ زمنية مدتها 5 دقائق دون اتصال بالإنترنت، مع دعم كامل للتشغيل السحابي الخالي من الخوادم (Serverless Webhook).
+التحقق من العامل الاحتياطي المكون من 7 أرقام والذي يعمل بنوافذ زمنية مدتها 5 دقائق دون اتصال بالإنترنت، مع دعم كامل للتشغيل السحابي المباشر عبر خدمة **Telegram Serverless الرسمية** (`tgcloud.ai`).
 
-> [!NOTE] خيارات معمارية التيليجرام
-> - **وضع Serverless Webhook (موصى به)**: يعمل عبر خدمات سحابية مجانية عديمة الخوادم مثل Cloudflare Workers أو Vercel أو AWS Lambda. يستجيب فورياً لطلبات المستخدم بآلية Webhook دون أي تكلفة تشغيل أو استهلاك موارد أثناء الخمول.
-> - **وضع Standalone Daemon**: يعمل كبرنامج بايثون تقليدي في الخلفية (Long-Polling) على السيرفر الخاص أو الجهاز المحلي.
-> - **آلية العمل غير المتصلة**: في كلتا الحالتين، يتحقق جهاز لينكس من صحة الرمز محلياً ورياضياً دون أي اتصال بالإنترنت وقت الدخول.
+> [!NOTE] خيارات معمارية التيليجرام في AkerGate
+> - **خدمة Telegram Serverless الرسمية (موصى بها)**: خدمة استضافة سحابية مدمجة رسمياً من تيليجرام ([core.telegram.org/bots/serverless](https://core.telegram.org/bots/serverless)). يعمل البوت داخل بيئات V8 معزولة على خوادم تيليجرام مباشرة بدون الحاجة لأي حساب سحابي خارجي، وبزمن استجابة فائق (أقل من 5 ميلي ثانية).
+> - **وضع External Serverless Webhook**: عبر Cloudflare Workers أو Vercel أو AWS Lambda مجاناً.
+> - **وضع Standalone Daemon**: كبرنامج بايثون تقليدي في الخلفية على السيرفر الخاص.
 
 - [ ] **فحص 5.1: اختيار نوع الخادم (Backend Architecture)**
   - من الواجهة: ادخل إلى `[1] Multi-Factor Authentication` ثم `[2] Telegram Bot & Offline OTP Settings`.
   - اختر `Select Backend Mode`:
-    - حدد `Serverless Webhook (Cloudflare Workers / Vercel)` للعمل بنظام Webhooks السحابي.
-    - أو حدد `Standalone Python Bot` للتشغيل المحلي.
+    - حدد `Official Telegram Serverless (tgcloud.ai)` لتشغيل البوت مباشرة على خوادم تيليجرام الرسمية.
+    - أو حدد `External Serverless Webhook (Cloudflare / Vercel)` للخدمات السحابية الخارجية.
+    - أو حدد `Standalone Python Bot` للتشغيل المحلي كخدمة خلفية.
 
-- [ ] **فحص 5.2: ربط رابط الـ Webhook السحابي آلياً**
-  - بعد نشر الدالة السحابية (الموجودة في `telegram_backends/cloudflare_worker` أو `telegram_backends/serverless_python`):
-  - اختر من الواجهة: `Register / Update Serverless Webhook URL`.
-  - أدخل رابط الـ Webhook الخاص بك (مثل: `https://akergate-otp.workers.dev`).
-  - **النتيجة المتوقعة**: قيام AkerGate باستدعاء `api.telegram.org` وربط الرابط فوراً مع رسالة تأكيد خضراء.
+- [ ] **فحص 5.2: تشغيل البوت على خدمة Telegram Serverless الرسمية**
+  - تفعيل الخدمة من بوت فاذر: افتح **@BotFather** -> `/mybots` -> اختر بوتك -> **Serverless** -> **Turn On**.
+  - ضبط البيانات: افتح `telegram_backends/telegram_serverless/tgcloud/config.js` وضع المعرف `ALLOWED_CHAT_ID` والمفتاح السري `SHARED_SECRET`.
+  - الرفع المباشر لخوادم تيليجرام:
+    ```bash
+    cd /home/yuki/Projects/AkerGate/telegram_backends/telegram_serverless
+    npx @tgcloud/cli login
+    npx @tgcloud/cli push
+    ```
+  - **النتيجة المتوقعة**: نشر البوت فورياً على بنية تيليجرام السحابية (`tgcloud.ai`) والاستجابة لأمر `/otp` مباشرة في التطبيق.
 
 - [ ] **فحص 5.3: معاينة الرمز الصالح للنافذة الحالية**
-  - لاحظ السطر الظاهر باللون الأخضر: `Sample Valid 7-Digit OTP for Current Window`.
-  - تأكد من أن أول رقم يمثل مؤشر الشريحة الزمنية الحالية (Slot Index).
+  - في لوحة تحكم AkerGate، لاحظ السطر الأخضر: `Sample Valid 7-Digit OTP for Current Window`.
+  - تأكد من تطابق الرمز المولد في تيليجرام عبر أمر `/otp` مع نفس الرقم والخانة المحسوبة في جهازك.
 
 - [ ] **فحص 5.4: اختبار التحقق من الرمز**
   - اختر `[4] Test 7-Digit Offline OTP`.

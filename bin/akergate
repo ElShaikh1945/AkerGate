@@ -18,22 +18,24 @@ from akergate.core.totp import compute_totp, build_otpauth_uri
 from akergate.pam.patcher import is_pam_patched, patch_pam, unpatch_pam
 from akergate.tui.qr_render import generate_terminal_qr
 from akergate.tui.app import main_tui
+from akergate.i18n import t, get_current_language, set_language, list_available_languages
 
 def print_help():
-    print("AkerGate - Multi-Auth Linux PAM Manager")
-    print("Usage: akergate [command]")
+    print(t("cli.help_header"))
+    print(t("cli.usage"))
     print("")
-    print("Commands:")
-    print("  (none)      Launch interactive Terminal UI (TUI)")
-    print("  status      Print current PAM and authentication status")
-    print("  qr          Display TOTP QR code in terminal")
-    print("  patch       Enable AkerGate in PAM (/etc/pam.d/common-auth)")
-    print("  unpatch     Disable AkerGate and restore original PAM")
-    print("  lockdown    Trigger emergency quarantine (dual_totp | strict_3fa | totp_only)")
-    print("  disarm      Disarm emergency lockdown and restore flexible multi-auth")
-    print("  report      Display latest forensic incident report")
-    print("  sentry      Run background Sentry event monitor daemon")
-    print("  help        Show this help message")
+    print(t("cli.commands"))
+    print(f"  {t('cli.cmd_none')}")
+    print(f"  {t('cli.cmd_status')}")
+    print(f"  {t('cli.cmd_qr')}")
+    print(f"  {t('cli.cmd_patch')}")
+    print(f"  {t('cli.cmd_unpatch')}")
+    print(f"  {t('cli.cmd_lockdown')}")
+    print(f"  {t('cli.cmd_disarm')}")
+    print(f"  {t('cli.cmd_report')}")
+    print(f"  {t('cli.cmd_sentry')}")
+    print(f"  lang [code] Switch or display language ({', '.join(list_available_languages())})")
+    print(f"  {t('cli.cmd_help')}")
 
 def main():
     if len(sys.argv) == 1:
@@ -44,14 +46,23 @@ def main():
 
     if cmd in ("-h", "--help", "help"):
         print_help()
+    elif cmd == "lang":
+        if len(sys.argv) > 2:
+            new_l = sys.argv[2].lower()
+            if set_language(new_l):
+                print(f"[+] Language changed to: {new_l}")
+            else:
+                print(f"[!] Language '{new_l}' not found. Available: {list_available_languages()}")
+        else:
+            print(f"[i] Current language: {get_current_language()} (Available: {list_available_languages()})")
     elif cmd == "status":
         cfg = load_config()
         patched = is_pam_patched()
         totp_ok = bool(get_totp_secret())
         tg_ok = bool(get_telegram_secret())
-        print(f"[i] PAM Hook Status:     {'[ACTIVE]' if patched else '[NOT CONFIGURED]'}")
-        print(f"[i] TOTP Configured:     {'[YES]' if totp_ok else '[NO]'}")
-        print(f"[i] Telegram Configured: {'[YES]' if tg_ok else '[NO]'}")
+        print(t("cli.status_pam", status='[ACTIVE]' if patched else '[NOT CONFIGURED]'))
+        print(t("cli.status_totp", status='[YES]' if totp_ok else '[NO]'))
+        print(t("cli.status_tg", status='[YES]' if tg_ok else '[NO]'))
     elif cmd == "qr":
         secret = get_totp_secret()
         if not secret:

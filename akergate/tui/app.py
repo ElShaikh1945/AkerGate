@@ -44,6 +44,7 @@ from akergate.pam.patcher import is_pam_patched, patch_pam, unpatch_pam
 from akergate.pam.rollback import run_failsafe_test
 from akergate.tui.qr_render import generate_terminal_qr
 from akergate.sentry.notifier import send_telegram_alert, is_network_available
+from akergate.i18n import t, get_current_language, set_language, list_available_languages
 
 console = Console()
 
@@ -52,22 +53,23 @@ def clear_screen():
 
 def print_header(active_tab: str = "Dashboard"):
     tabs = [
-        ("1", "Dashboard"),
-        ("2", "Services"),
-        ("3", "TOTP / QR"),
-        ("4", "Telegram"),
-        ("5", "Sentry"),
-        ("6", "Audit Logs"),
-        ("7", "Lockdown"),
-        ("Q", "Quit")
+        ("1", t("tabs.dashboard")),
+        ("2", t("tabs.services")),
+        ("3", t("tabs.totp")),
+        ("4", t("tabs.telegram")),
+        ("5", t("tabs.sentry")),
+        ("6", t("tabs.logs")),
+        ("7", t("tabs.lockdown")),
+        ("L", f"Lang: {get_current_language().upper()}"),
+        ("Q", t("tabs.quit"))
     ]
     
     header_text = Text()
-    header_text.append(f"{APP_NAME.upper()} [v{APP_VERSION}] ", style="bold cyan")
-    header_text.append(f"| Developed by {AUTHOR} | Non-Commercial\n", style="dim")
+    header_text.append(f"{t('app.name').upper()} [v{APP_VERSION}] ", style="bold cyan")
+    header_text.append(f"| {t('app.credits')}\n", style="dim")
     
     for key, name in tabs:
-        if name == active_tab:
+        if name.lower() == active_tab.lower() or (active_tab == "Dashboard" and key == "1"):
             header_text.append(f" [{key}] {name} ", style="bold white on blue")
         else:
             header_text.append(f" [{key}] {name} ", style="dim")
@@ -91,37 +93,37 @@ def render_dashboard():
     table.add_column("Details")
     
     table.add_row(
-        "PAM Integration",
-        "[green][ACTIVE][/green]" if pam_status else "[yellow][NOT CONFIGURED][/yellow]",
-        "/etc/pam.d/common-auth" if pam_status else "Select [2] Services to configure"
+        t("dashboard.pam_integration"),
+        f"[green]{t('dashboard.active')}[/green]" if pam_status else f"[yellow]{t('dashboard.not_configured')}[/yellow]",
+        t("dashboard.pam_active_desc") if pam_status else t("dashboard.pam_inactive_desc")
     )
     table.add_row(
-        "Hardware Clock (RTC)",
-        "[green][OK][/green]",
-        f"Local time: {time.strftime('%Y-%m-%d %H:%M:%S')}"
+        t("dashboard.rtc_clock"),
+        f"[green]{t('dashboard.clock_ok')}[/green]",
+        t("dashboard.local_time", time=time.strftime('%Y-%m-%d %H:%M:%S'))
     )
     table.add_row(
-        "Offline TOTP",
-        "[green][CONFIGURED][/green]" if totp_configured else "[yellow][UNSET][/yellow]",
-        "RFC 6238 6-Digit Authenticator Key" if totp_configured else "Select [3] to set up"
+        t("dashboard.offline_totp"),
+        f"[green]{t('dashboard.configured')}[/green]" if totp_configured else f"[yellow]{t('dashboard.unset')}[/yellow]",
+        t("dashboard.totp_desc") if totp_configured else t("dashboard.totp_unset_desc")
     )
     table.add_row(
-        "Telegram Offline OTP",
-        "[green][CONFIGURED][/green]" if tg_configured else "[yellow][UNSET][/yellow]",
-        f"Backend: {config.get('telegram', {}).get('backend', 'cloudflare')} (7-Digit)"
+        t("dashboard.telegram_otp"),
+        f"[green]{t('dashboard.configured')}[/green]" if tg_configured else f"[yellow]{t('dashboard.unset')}[/yellow]",
+        t("dashboard.telegram_desc", backend=config.get('telegram', {}).get('backend', 'cloudflare'))
     )
     table.add_row(
-        "Network Link",
-        "[green][ONLINE][/green]" if is_network_available() else "[yellow][OFFLINE][/yellow]",
-        "Sentry queue active for offline alerts"
+        t("dashboard.network_link"),
+        f"[green]{t('dashboard.online')}[/green]" if is_network_available() else f"[yellow]{t('dashboard.offline')}[/yellow]",
+        t("dashboard.network_desc")
     )
     
-    console.print(Panel(table, title="[bold]System Status Overview[/bold]", border_style="cyan"))
+    console.print(Panel(table, title=f"[bold]{t('dashboard.title')}[/bold]", border_style="cyan"))
     
     # Protected Services Summary
     services = config.get("services", {})
     srv_text = Text()
-    srv_text.append("Protected Entry Points:\n", style="bold")
+    srv_text.append(f"{t('dashboard.protected_entries')}\n", style="bold")
     for srv, enabled in services.items():
         symbol = "[x]" if enabled else "[ ]"
         style = "green" if enabled else "dim red"
@@ -134,17 +136,17 @@ def render_dashboard():
         try:
             lines = log_file.read_text(encoding="utf-8").strip().splitlines()[-5:]
             if lines:
-                log_table = Table(title="Recent Authentication Events", expand=True)
-                log_table.add_column("Time", style="dim")
-                log_table.add_column("User")
-                log_table.add_column("Service")
-                log_table.add_column("Method")
-                log_table.add_column("Result")
+                log_table = Table(title=t("dashboard.recent_events"), expand=True)
+                log_table.add_column(t("dashboard.col_time"), style="dim")
+                log_table.add_column(t("dashboard.col_user"))
+                log_table.add_column(t("dashboard.col_service"))
+                log_table.add_column(t("dashboard.col_method"))
+                log_table.add_column(t("dashboard.col_result"))
                 
                 for line in reversed(lines):
                     import json
                     ev = json.loads(line)
-                    res_str = "[green]SUCCESS[/green]" if ev.get("success") else "[red]FAILED[/red]"
+                    res_str = f"[green]{t('dashboard.success')}[/green]" if ev.get("success") else f"[red]{t('dashboard.failed')}[/red]"
                     log_table.add_row(
                         ev.get("iso_time", ""),
                         ev.get("user", ""),
@@ -592,8 +594,8 @@ def main_tui():
         
         if active_tab == "Dashboard":
             render_dashboard()
-            console.print("\n[bold]Select view [1-7] or [Q] to quit:[/bold]")
-            key = Prompt.ask("Action", choices=["1", "2", "3", "4", "5", "6", "7", "q", "Q"], default="1")
+            console.print(f"\n[bold]{t('app.select_view')}[/bold]")
+            key = Prompt.ask("Action", choices=["1", "2", "3", "4", "5", "6", "7", "l", "L", "q", "Q"], default="1")
             
             if key == "1": active_tab = "Dashboard"
             elif key == "2": active_tab = "Services"
@@ -602,6 +604,10 @@ def main_tui():
             elif key == "5": active_tab = "Sentry"
             elif key == "6": active_tab = "Audit Logs"
             elif key == "7": active_tab = "Lockdown"
+            elif key in ("l", "L"):
+                curr = get_current_language()
+                nxt = "ar" if curr == "en" else "en"
+                set_language(nxt)
             elif key in ("q", "Q"): break
             
         elif active_tab == "Services":

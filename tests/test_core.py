@@ -31,6 +31,7 @@ from akergate.core.lockdown import (
     parse_custom_policy,
     evaluate_custom_disarm
 )
+from akergate.i18n import t, set_language, get_current_language, list_available_languages
 
 class TestAkerGateCore(unittest.TestCase):
 
@@ -157,6 +158,34 @@ class TestAkerGateCore(unittest.TestCase):
         sat_consec, msg2 = evaluate_custom_disarm(f"{c1}{c2}", secret, "")
         self.assertTrue(sat_consec, msg2)
         self.assertFalse(is_lockdown_active())
+
+    def test_i18n_engine(self):
+        langs = list_available_languages()
+        self.assertIn("en", langs)
+        self.assertIn("ar", langs)
+        
+        # English translation test
+        set_language("en")
+        self.assertEqual(get_current_language(), "en")
+        en_title = t("dashboard.title")
+        self.assertEqual(en_title, "System Status Overview")
+        
+        # Arabic translation test
+        set_language("ar")
+        self.assertEqual(get_current_language(), "ar")
+        ar_title = t("dashboard.title")
+        self.assertEqual(ar_title, "نظرة عامة على حالة النظام")
+        
+        # Parameter interpolation test
+        interpolated = t("dashboard.local_time", time="12:00:00")
+        self.assertIn("12:00:00", interpolated)
+        
+        # Fallback test for non-existent key
+        fallback = t("non_existent_key_xyz")
+        self.assertEqual(fallback, "non_existent_key_xyz")
+        
+        # Reset back to English
+        set_language("en")
 
 if __name__ == "__main__":
     unittest.main()

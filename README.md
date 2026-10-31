@@ -26,6 +26,7 @@
 * **Interactive Terminal User Interface (TUI):** A complete keyboard-driven terminal console with real-time status dashboards, service toggles, log streams, incident reports, and **phone-scannable Unicode QR codes rendered directly in your terminal**.
 * **30-Second Failsafe Auto-Rollback:** When applying PAM changes, a failsafe countdown prevents lockouts. If not confirmed, AkerGate automatically reverts to original PAM configuration.
 * **Sentry Event Monitor & Offline Queue:** Continuous tracking of logins, sessions, and failed attempts. If an authentication event occurs while offline, Sentry queues the alert and sends it to Telegram the moment an internet connection is re-established.
+* **Multi-Language Support (i18n):** All strings and prompts are stored in external JSON files (`akergate/i18n/locales/`). Shipped out-of-the-box with English (`en.json`) and Arabic (`ar.json`), with instant language switching in TUI or via CLI.
 * **Zero External Dependencies for Core PAM:** The PAM authentication hook runs on pure standard library Python, eliminating runtime breakage risks from package managers or virtual environments.
 
 ---
@@ -83,11 +84,15 @@ sudo akergate
 ```
 
 ### CLI Shortcut Commands:
-* `akergate status` : Display active PAM status, keys, and clock health.
-* `akergate qr`     : Display the TOTP QR code directly in the terminal for phone scanning.
-* `akergate patch`  : Safely apply AkerGate multi-auth rules to `/etc/pam.d/common-auth`.
-* `akergate unpatch`: Safely remove AkerGate and restore original system PAM settings.
-* `akergate sentry` : Run the background event and session monitor.
+* `akergate status`   : Display active PAM status, keys, and clock health.
+* `akergate qr`       : Display the TOTP QR code directly in the terminal for phone scanning.
+* `akergate lang [ar|en]` : Switch interface language or display current locale.
+* `akergate patch`    : Safely apply AkerGate multi-auth rules to `/etc/pam.d/common-auth`.
+* `akergate unpatch`  : Safely remove AkerGate and restore original system PAM settings.
+* `akergate lockdown` : Trigger emergency quarantine (customizable disarm policy).
+* `akergate disarm`   : Disarm emergency lockdown and restore flexible multi-auth.
+* `akergate report`   : Display latest forensic incident report.
+* `akergate sentry`   : Run the background event and session monitor.
 
 ---
 
